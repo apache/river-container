@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : config-test-doc.xml
+    Created on : November 24, 2010, 4:13 PM
+    Author     : trasukg
+    Description:
+        Purpose of the document follows.
+-->
+
+<cfg:container-config  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+   xmlns:cfg='http://river.apache.org/xml/ns/container/config/1.0'
+   xsi:schemaLocation='http://river.apache.org/xml/ns/container/config/1.0 file:/home/trasukg/development/surrogate/schemas/config.xsd'>
+    <cfg:classpath>lib/abc.jar</cfg:classpath>
+
+    <cfg:discovery-context is-default="false" id="">
+        <cfg:locator></cfg:locator>
+        <cfg:group></cfg:group>
+    </cfg:discovery-context>
+
+    <cfg:property name="abc" value="def"/>
+
+    <!-- This ought to cause a validation error. -->
+    <component class="org.apache.SomethingOrOther"/>
+
+</cfg:container-config>

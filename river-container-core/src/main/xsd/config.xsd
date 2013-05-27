@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+    targetNamespace="http://river.apache.org/xml/ns/container/config/1.0"
+    xmlns:tns="http://river.apache.org/xml/ns/container/config/1.0"
+    jaxb:version="2.0" elementFormDefault="qualified">
+    <xsd:element name="container-config">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="tns:classpath" maxOccurs="unbounded" minOccurs="0"/>
+                <xsd:choice maxOccurs="unbounded">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <jaxb:property name="elements"/>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                    <xsd:element ref="tns:property"/>
+                    <xsd:element ref="tns:component"/>
+                    <xsd:element name="discovery-context"
+                    type="tns:DiscoveryContextType"/>
+                </xsd:choice>
+                
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:complexType name="DiscoveryContextType">
+        <xsd:sequence>
+            <xsd:element name="locator" type="xsd:anyURI" minOccurs="0"
+            maxOccurs="unbounded"/>
+            <xsd:element name="group" type="xsd:string" minOccurs="0"
+            maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="name" type="xsd:string" use="optional"/>
+    </xsd:complexType>
+    
+    <xsd:element name="classpath">
+        <xsd:complexType>
+            <xsd:simpleContent>
+                <xsd:extension base="xsd:string">
+                    <xsd:attribute name="id" use="required" type="xsd:string"/>
+                    <xsd:attribute name="parent" use="optional" type="xsd:string"/>
+                </xsd:extension>
+            </xsd:simpleContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="codebase" type="xsd:string"/>
+
+    <xsd:element name="property">
+        <xsd:complexType>
+            <xsd:attribute name="name" type="xsd:string" use="required"/>
+            <xsd:attribute name="value" type="xsd:string" use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="component">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="tns:property" minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:sequence>
+            <xsd:attribute name="name" type="xsd:string" use="optional"/>
+            <xsd:attribute name="class" type="xsd:string" use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="service-starter-config">
+        <xsd:annotation>
+            <xsd:documentation>
+                This element is used in the configuration file for the
+                service-starter service deployer component.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="tns:classpath" minOccurs="0"/>
+                <xsd:element ref="tns:codebase" minOccurs="0"/>
+                <xsd:choice maxOccurs="unbounded">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <jaxb:property name="elements"/>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                    <xsd:element name="discovery-context"
+                    type="tns:DiscoveryContextType"/>
+                </xsd:choice>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>

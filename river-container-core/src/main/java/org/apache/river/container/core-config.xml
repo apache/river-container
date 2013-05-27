@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : config.xml
+    Created on : December 10, 2010, 6:39 PM
+    Author     : trasukg
+    Description:
+        This is the core configuration that is processed by the
+        Bootstrap system prior to processing the profile's config.xml
+
+        Items defined in this config are subject to being overwritten by the
+        profile's config (e.g. classpath or properties settings).  As such,
+        this is a good place to set defaults.
+
+        It also gives a spot to include elements that are required in every
+        profile, for instance the AnnotatedClassDeployer and MBeanRegistrar.
+-->
+
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+ -->
+
+<cfg:container-config  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+   xmlns:cfg='http://river.apache.org/xml/ns/container/config/1.0'
+   xsi:schemaLocation='http://river.apache.org/xml/ns/container/config/1.0 file:/home/trasukg/development/surrogate/src/schemas/config.xsd'>
+    <!-- Dynamic policy provider needs to be available to both the container and
+    any "application" classloaders, so it needs to be in a classloader which is
+    a parent to both the container classloader and the application loaders.
+    In traditional Jini usage, jsk-policy.jar was put into the extensions directory,
+    hence was available in the "extensions" loader.  Here, we'd prefer not to 
+    require any changes to the JSDK installation directory.
+    -->
+    <cfg:classpath id="systemClassLoader">lib/jsk-policy.jar</cfg:classpath>
+    <cfg:classpath id="containerClassLoader" parent="systemClassLoader">
+        lib/RiverSurrogate.jar
+        lib/commons-logging-1.1.1.jar
+        lib/commons-vfs-1.0.jar
+        lib/jsk-platform.jar
+        lib/jsk-resources.jar
+    </cfg:classpath>
+
+    <!--cfg:component class="org.apache.river.container.ShowContextToConsole"/-->
+    <cfg:component class="org.apache.river.container.AnnotatedClassDeployer"/>
+
+    <cfg:component class="org.apache.river.container.security.SecurityInitializer"/>
+    
+    <cfg:component class="org.apache.river.container.el.ArgsParserImpl"/>
+    
+    <cfg:property name="deploymentDirectory" value="deploy"/>
+
+    <cfg:component class="org.apache.river.container.SystemClassloaderInitializer"/>
+    <cfg:component class="org.apache.river.container.CommandLineArgumentParser"/>
+    <cfg:component class="org.apache.river.container.MBeanRegistrar"/>
+    <cfg:component class="org.apache.river.container.ShutdownListener"/>
+    <cfg:component class="org.apache.river.container.FileUtilityImpl"
+        name="fileUtility"/>
+    <cfg:component class="org.apache.river.container.PropertiesFileReader"/>
+    <cfg:component class="org.apache.river.container.ProfileConfigReader"/>
+
+</cfg:container-config>

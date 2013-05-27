@@ -1,0 +1,148 @@
+options {
+  LOOKAHEAD = 1;
+  CHOICE_AMBIGUITY_CHECK = 2;
+  OTHER_AMBIGUITY_CHECK = 1;
+  STATIC = false;
+  DEBUG_PARSER = false;
+  DEBUG_LOOKAHEAD = false;
+  DEBUG_TOKEN_MANAGER = false;
+  ERROR_REPORTING = true;
+  JAVA_UNICODE_ESCAPE = false;
+  UNICODE_INPUT = false;
+  IGNORE_CASE = false;
+  USER_TOKEN_MANAGER = false;
+  USER_CHAR_STREAM = false;
+  BUILD_PARSER = true;
+  BUILD_TOKEN_MANAGER = true;
+  SANITY_CHECK = true;
+  BUILD_NODE_FILES = true;
+  FORCE_LA_CHECK = false;
+  MULTI = true;
+  NODE_DEFAULT_VOID = true;
+  VISITOR = true;
+  NODE_CLASS= "ASTNode";
+}
+
+PARSER_BEGIN(ClasspathExpressionParser)
+
+package org.apache.river.container.classloading;
+
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
+
+import java.util.logging.Logger;
+
+public class ClasspathExpressionParser {
+	private static final Logger log=
+		Logger.getLogger(ClasspathExpressionParser.class.getName());
+
+
+}
+PARSER_END(ClasspathExpressionParser)
+
+/* WHITE SPACE */
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+| "\f"
+| <"//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+| <"/*" (~["*"])* "*" ("*" | ~["*","/"] (~["*"])* "*")* "/">}
+
+TOKEN :
+{
+  	< SYMBOL:
+		["A"-"Z", "a"-"z", "_"] (["0"-"9", "A"-"Z", "a"-"z", ".", "_", "-", "$"])*>
+|	< STRING_LITERAL:
+ 	("\""
+    (   (~["\"","\\","\n","\r"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+      )*
+      "\"" )
+	| ("\'"
+    	(   (~["'","\\","\n","\r"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+      )*
+      "\'") >
+		{
+			/* Remove the leading and trailing quotes. */
+			image.deleteCharAt(image.length() -1);
+			image.deleteCharAt(0);
+			matchedToken.image=image.toString();
+		}
+|  	< COMMA: "," >
+|       < COLON: ":" >
+|       < LPAREN: "(" >
+|       < RPAREN: ")" >
+}
+
+void cpExpression() #cpExpression:
+{
+    log.finest("cpExpression()");
+}
+{
+    cpClause() ( <COLON> cpClause())*
+}
+
+void cpClause() #cpClause:
+{
+    log.finest("cpClause()");
+}
+{
+    symbol() [ <LPAREN> filterExpression() <RPAREN>]
+}
+
+void filterExpression():
+{
+    log.finest("filterExpression()");
+}
+{
+    filterClause() ( <COMMA> filterClause())*
+}
+
+void filterClause():
+{
+    log.finest("filterClause()");
+}
+{
+    symbol() | stringLiteral()
+}
+
+
+void symbol() #symbol:
+{
+        log.finest("symbol()");
+        Token t=null;
+}
+{
+        t=<SYMBOL> {
+            jjtThis.setValue(t.image);
+        }
+}
+
+void stringLiteral() #stringLiteral:
+{
+        log.finest("stringLiteral()");
+        Token t=null;
+}
+{
+        t=<STRING_LITERAL> {
+            jjtThis.setValue(t.image);
+        }
+}
+
+

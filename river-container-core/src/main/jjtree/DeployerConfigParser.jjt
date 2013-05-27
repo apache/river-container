@@ -1,0 +1,413 @@
+options {
+  LOOKAHEAD = 1;
+  CHOICE_AMBIGUITY_CHECK = 2;
+  OTHER_AMBIGUITY_CHECK = 1;
+  STATIC = false;
+  DEBUG_PARSER = false;
+  DEBUG_LOOKAHEAD = false;
+  DEBUG_TOKEN_MANAGER = false;
+  ERROR_REPORTING = true;
+  JAVA_UNICODE_ESCAPE = false;
+  UNICODE_INPUT = false;
+  IGNORE_CASE = false;
+  USER_TOKEN_MANAGER = false;
+  USER_CHAR_STREAM = false;
+  BUILD_PARSER = true;
+  BUILD_TOKEN_MANAGER = true;
+  SANITY_CHECK = true;
+  BUILD_NODE_FILES = true;
+  FORCE_LA_CHECK = false;
+  MULTI = true;
+  NODE_DEFAULT_VOID = true;
+  VISITOR = true;
+  NODE_CLASS= "ASTNode";
+}
+
+PARSER_BEGIN(DeployerConfigParser)
+
+package org.apache.river.container.deployer;
+
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+
+import java.util.logging.Logger;
+
+
+public class DeployerConfigParser {
+	private static final Logger log=
+		Logger.getLogger(DeployerConfigParser.class.getName());
+
+    public static ASTconfig parseConfig(InputStream in)
+	throws ParseException {
+		Reader r=new InputStreamReader(in);
+		DeployerConfigParser parser=new DeployerConfigParser(r);
+                parser.config();
+                return (ASTconfig) parser.jjtree.popNode();
+    }
+
+}
+PARSER_END(DeployerConfigParser)
+
+/* WHITE SPACE */
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+| "\f"
+| <"//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+| <"/*" (~["*"])* "*" ("*" | ~["*","/"] (~["*"])* "*")* "/">}
+
+TOKEN :
+{
+  < INTEGER_LITERAL: ["0"-"9"] (["0"-"9"])* >
+|  < FLOATING_POINT_LITERAL:
+        (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? (["f","F","d","D"])?
+      | "." (["0"-"9"])+ (<EXPONENT>)? (["f","F","d","D"])?
+      | (["0"-"9"])+ <EXPONENT> (["f","F","d","D"])?
+      | (["0"-"9"])+ (<EXPONENT>)? ["f","F","d","D"]
+	  | ["0"-"9"] (["0"-"9"])*
+  >
+|  < #EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+ >
+|  < LONG_LITERAL: ["0"-"9"] (["0"-"9"])* (["l", "L"]) >
+| 	< GRANT: "grant" >
+|       < CLASSLOADER: "classloader">
+|       < CODEBASE: "codebase">
+|       < CONFIGURATION: "configuration">
+|       < JARS: "jars">
+|       < PARENT: "parent">
+| 	< AND: "and" >
+| 	< OR: "or" >
+| 	< NOT: "not" >
+| 	< TRUE: "true" >
+| 	< FALSE: "false" >
+|  	< SYMBOL:
+		["A"-"Z", "a"-"z", "_"] 
+                    (["0"-"9", "A"-"Z", "a"-"z", ".", "_", "-", "$"])*>
+|	< STRING_LITERAL:
+ 	("\""
+    (   (~["\"","\\","\n","\r"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+      )*
+      "\"" )
+	| ("\'"
+    	(   (~["'","\\","\n","\r"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+      )*
+      "\'") >
+		{
+			/* Remove the leading and trailing quotes. */
+			image.deleteCharAt(image.length() -1);
+			image.deleteCharAt(0);
+			matchedToken.image=image.toString();
+		}
+|	< PLUS: "+" >
+|	< MINUS: "-" >
+|	< STAR: "*" >
+|	< OVER: "/" >
+|	< HOOK: "?" >
+|	< COLON: ":" >
+| 	< EQUALS: "=" >
+| 	< GT: ">" >
+|	< LT: "<" >
+| 	< LTE: "<=" >
+|	< GTE: ">=" >
+|	< NEQ: "<>" >
+| 	< COMMA: "," >
+|       < LBRACE: "{" >
+|       < RBRACE: "}" >
+|       < LPAREN: "(" >
+|       < RPAREN: ")" >
+|       < SEMICOLON: ";">
+
+}
+
+void config() #config:
+{
+    log.fine("config()");
+}
+{
+    (grant() | classloader() | configuration())*
+}
+
+void grant() #grant:
+{
+    log.fine("grant()");
+}
+{
+    <GRANT> "{" (permission())* "}"
+}
+
+void permission() #permission:
+{
+    log.fine("permission()");
+}
+{
+    symbol() [literal() [literal()]]";"
+}
+
+void classloader() #classloader:
+{
+    log.fine("classloader()");
+}
+{
+    <CLASSLOADER> <LBRACE> parent() [jars()] [codebase()] <RBRACE>
+}
+
+void jars() #jars:
+{ 
+    log.fine("jars()");
+}
+{
+    <JARS> <LBRACE> classpath() <RBRACE>
+}
+
+void parent() #parent:
+{
+    log.fine("parent()");
+}
+{
+    <PARENT> symbol() <SEMICOLON>
+}
+
+void codebase() #codebase:
+{
+    log.fine("codebase()");
+}
+{
+    <CODEBASE> <LBRACE> symbol() (<COMMA> symbol())* <RBRACE>
+}
+
+void configuration() #configuration:
+{
+    log.fine("configuration()");
+}
+{
+    <CONFIGURATION> <LBRACE> (configEntry())* <RBRACE>
+}
+
+void classpath() #classpath:
+{
+    log.fine("classpath()");
+}
+{
+    cpEntry() (<COMMA> cpEntry() )*
+}
+
+void cpEntry() #cpEntry:
+{
+    log.fine("cpEntry()");
+}
+{
+    symbol() [ <LPAREN> filterExpression() <RPAREN>]
+}
+
+void filterExpression():
+{
+    log.finest("filterExpression()");
+}
+{
+    filterClause() ( <COMMA> filterClause())*
+}
+
+void filterClause():
+{
+    log.finest("filterClause()");
+}
+{
+    symbol() | literal()
+}
+
+void configEntry() #configEntry:
+{
+    log.fine("configEntry()");
+}
+{
+    symbol() <EQUALS> symbol() <SEMICOLON>
+}
+
+void primary() :
+{
+	log.fine("primary()");
+	String t=null;
+}
+{
+	literal()
+	| "(" expression() ")"
+}
+
+void literal() #literal:
+{
+	Token t=null;
+	log.fine("literal");
+}
+{
+   	t=<INTEGER_LITERAL> {
+                log.fine("integer literal " + t.image);
+                jjtThis.setValue(new Integer(t.image));
+	}
+        |
+   	t=<FLOATING_POINT_LITERAL> {
+                log.fine("floating-point literal " + t.image);
+                jjtThis.setValue(Float.parseFloat(t.image));
+	}
+	|
+   	t=<LONG_LITERAL> {
+                log.fine("long literal " + t.image);
+                jjtThis.setValue(Long.parseLong(t.image));
+	}
+	|
+	t=<STRING_LITERAL>  { 
+                jjtThis.setValue(t.image);
+        }
+	|
+	t=<TRUE>   { 
+                jjtThis.setValue(true);
+        }
+	|
+	t=<FALSE>  {
+                jjtThis.setValue(false);
+        }
+}
+
+void symbol() #symbol:
+{
+        log.fine("symbol()");
+        Token t=null;
+}
+{
+        t=<SYMBOL> {
+            jjtThis.setValue(t.image);
+        }
+}
+
+void expression() :
+{
+	log.fine("expression()");
+}
+{
+	booleanExpression() choiceTerm()
+}
+
+void additiveExpression() :
+{
+	log.fine("additiveExpression()");
+}
+{
+	additiveTerm() additiveList()
+}
+
+void booleanExpression():
+{
+	log.fine("booleanExpression()");
+}
+{
+	booleanTerm() booleanList()
+}
+
+void booleanTerm():
+{
+	log.fine("booleanTerm()");
+}
+{
+	<NOT> conditionalExpression() #booleanNot(1)
+	| conditionalExpression()
+}
+
+void booleanList():
+{
+	log.fine("booleanList()");
+}
+{
+	(
+		<AND> booleanTerm() #booleanAnd(2)
+		| <OR> booleanTerm() #booleanOr(2)
+	) *
+}
+
+void conditionalExpression():
+{
+	log.fine("conditionalExpression()");
+}
+{
+	additiveExpression() conditionalList()
+}
+
+void conditionalList() :
+{
+	log.fine("conditionalList()");
+}
+{
+	(
+		<EQUALS> additiveExpression() #equals(2)
+		| <LT> additiveExpression() #lessThan(2)
+		| <GT> additiveExpression() #greaterThan(2)
+		| <LTE> additiveExpression() #lessThanOrEqual(2)
+		| <GTE> additiveExpression() #greaterThanOrEqual(2)
+		| <NEQ> additiveExpression() #notEqual(2)
+	) ?
+}
+
+void choiceTerm() :
+{
+}
+{
+	( <HOOK> expression() <COLON> expression() #choice(3)
+	 )?
+}
+
+void additiveList() :
+{
+	log.fine("additiveList()");
+}
+{
+	(
+		<PLUS> additiveTerm() #plus(2)
+		| <MINUS> additiveTerm() #minus(2)
+	) *
+}
+
+void additiveTerm():
+{
+	log.fine("additiveTerm()");
+}
+{
+	multiplicativeTerm() multiplicativeList()
+}
+
+void multiplicativeTerm():
+{
+	log.fine("multiplicativeTerm()");
+}
+{
+	primary()
+}
+
+void multiplicativeList() :
+{
+	log.fine("multiplicativeList()");
+}
+{
+	(
+		<STAR> multiplicativeTerm() #multiply(2)
+		| <OVER> multiplicativeTerm() #divide(2)
+	) *
+}
+
+
+
