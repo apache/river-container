@@ -3,11 +3,11 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.apache.river</groupId>
+        <groupId>org.apache.river.container</groupId>
         <artifactId>river-container</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <groupId>org.apache.river</groupId>
+    <groupId>org.apache.river.container</groupId>
     <artifactId>river-container-core</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>river-container-core</name>
