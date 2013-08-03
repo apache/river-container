@@ -55,7 +55,8 @@ public class SurrogateContextTest {
     public void tearDown() {
     }
 
-    @Test
+    //Not ready for prime time.
+    //@Test
     /**
      Make sure that the jar containing our test surrogate is actually there.
      It should be built by the "-post-compile-test" target in 'build.xml'.

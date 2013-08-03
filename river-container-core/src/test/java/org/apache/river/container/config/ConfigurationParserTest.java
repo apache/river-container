@@ -18,6 +18,7 @@
 
 package org.apache.river.container.config;
 
+import java.io.File;
 import java.io.InputStream;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBException;
@@ -57,7 +58,7 @@ public class ConfigurationParserTest {
         ctx = JAXBContext.newInstance("org.apache.river.container.config");
         um = ctx.createUnmarshaller();
         SchemaFactory sf=SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        Source source=new StreamSource(getClass().getResourceAsStream("/schemas/config.xsd"));
+        Source source=new StreamSource(new File("src/main/xsd/config.xsd"));
         Schema schema=sf.newSchema(source);
         um.setSchema(schema);
     }

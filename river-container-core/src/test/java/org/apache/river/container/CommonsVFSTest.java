@@ -70,19 +70,18 @@ public class CommonsVFSTest {
     public void testBaseFile() throws Exception {
         FileObject fo = fileSystemManager.resolveFile(new File("."), ".");
         System.out.println("fo=" + fo);
-        assertTrue(fo.toString().endsWith("build/testroot"));
+        assertTrue(fo.toString().endsWith("river-container-core"));
     }
 
     /**
-    Should be able to get the current directory, and it should end with
-    'testfiles/testroot'.
+    Should be able to go to a directory and ask for files that end with ".jar".
     @throws Exception
      */
     @Test
     public void testSuffixSelector() throws Exception {
-        FileObject fo = fileSystemManager.resolveFile(new File("."), "lib");
+        FileObject fo = fileSystemManager.resolveFile(new File("."), "target/reggie-module");
         System.out.println("fo=" + fo);
-        assertTrue(fo.toString().endsWith("build/testroot/lib"));
+        assertTrue(fo.toString().endsWith("target/reggie-module"));
         List<FileObject> jars=Utils.findChildrenWithSuffix(fo, Strings.DOT_JAR);
         assertTrue("Didn't get any jar files.", jars.size()>0);
     }
@@ -94,8 +93,8 @@ public class CommonsVFSTest {
     @Test
     public void testFileInReggieModuleJar() throws Exception {
         FileObject reggieJar =
-                fileSystemManager.resolveFile(new File("../../build/test/files"), "reggie-module.ssar");
-        assertTrue("Bad file:" + reggieJar.toString(), reggieJar.toString().endsWith("reggie-module.ssar"));
+                fileSystemManager.resolveFile(new File("target/reggie-module"), "reggie-module.jar");
+        assertTrue("Bad file:" + reggieJar.toString(), reggieJar.toString().endsWith("reggie-module.jar"));
         FileObject reggieJarFS = fileSystemManager.createFileSystem(Strings.JAR, reggieJar);
 
         FileObject startProperties = reggieJarFS.resolveFile("start.properties");

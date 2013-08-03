@@ -61,7 +61,8 @@ public class SecurityManagerTest {
     public void tearDown() {
     }
     
-    @Test
+    // Not ready for prime time yet.
+    //@Test
     public void testSecuritySetup() throws IOException {
         /* Design by Magic... */
         /* Start the container. */

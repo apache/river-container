@@ -61,7 +61,7 @@ public class VFSClassLoaderTest {
         fileSystemManager = VFS.getManager();
         FileObject currentDir = fileSystemManager.toFileObject(new File("."));
         FileObject reggieModuleJar =
-                currentDir.resolveFile("../test/files/reggie-module.ssar");
+                currentDir.resolveFile("target/reggie-module/reggie-module.jar");
         reggieModuleRoot = fileSystemManager.createFileSystem(Strings.JAR,
                 reggieModuleJar);
         libRoot=reggieModuleRoot.resolveFile(Strings.LIB);
@@ -113,7 +113,7 @@ public class VFSClassLoaderTest {
     public void testClassLoaderResourceLoading() throws Exception {
         VirtualFileSystemClassLoader UUT =
                 new VirtualFileSystemClassLoader(libRoot, extensionLoader, null);
-        UUT.addClassPathEntry("reggie.jar");
+        UUT.addClassPathEntry("reggie-2.2.1.jar");
         InputStream is = UUT.getResourceAsStream("META-INF/PREFERRED.LIST");
         assertNotNull("Failed to get resource stream for META-INF/PREFERRED.LIST",
                 is);
@@ -132,7 +132,7 @@ public class VFSClassLoaderTest {
     public void testClassLoading() throws Exception {
         VirtualFileSystemClassLoader UUT =
                 new VirtualFileSystemClassLoader(libRoot, extensionLoader, null);
-        UUT.addClassPathEntry("reggie.jar");
+        UUT.addClassPathEntry("reggie-2.2.1.jar");
         Class c = UUT.loadClass("com.sun.jini.reggie.ClassMapper");
         assertNotNull(c);
         assertTrue("Class had wrong classloader:" + c.getClassLoader(),
@@ -149,7 +149,7 @@ public class VFSClassLoaderTest {
     public void testParentClassLoading() throws Exception {
         VirtualFileSystemClassLoader UUT =
                 new VirtualFileSystemClassLoader(libRoot, extensionLoader, null);
-        UUT.addClassPathEntry("reggie.jar");
+        UUT.addClassPathEntry("reggie-2.2.1.jar");
         Class c = UUT.loadClass("java.util.List");
         assertNotNull(c);
         assertTrue("Class had wrong classloader:" + c.getClassLoader(),
@@ -161,7 +161,7 @@ public class VFSClassLoaderTest {
     public void testCodebaseAnnotation() throws Exception {
         VirtualFileSystemClassLoader UUT =
                 new VirtualFileSystemClassLoader(libRoot, extensionLoader, null);
-        UUT.addClassPathEntry("reggie.jar");
+        UUT.addClassPathEntry("reggie-2.2.1.jar");
         /* At this point, there should be no urls on the reported codebase. */
         URL[] actual=UUT.getURLs();
         assertTrue("Should be no urls, but got " + Utils.format(actual),
@@ -189,7 +189,7 @@ public class VFSClassLoaderTest {
     public void testFilteredClassLoading() throws Exception {
         VirtualFileSystemClassLoader UUT =
                 new VirtualFileSystemClassLoader(libRoot, extensionLoader, null);
-        UUT.addClassPathEntry("reggie.jar(com.sun.jini.reggie.ClassMapper)");
+        UUT.addClassPathEntry("reggie-2.2.1.jar(com.sun.jini.reggie.ClassMapper)");
         /* We should now be able to load the ClassMapper class, but nothing
         else.
         */

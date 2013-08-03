@@ -58,17 +58,13 @@ public class SocketAddressTest {
     use in the codebase annotation.
     @throws Exception 
     */
-    @Test
+    // Skipped - it's answered the question, but might be needed later.
+    //@Test
     public void testSocketBind() throws Exception {
 
         ServerSocket socket = new ServerSocket();
         socket.bind(new InetSocketAddress(8080));
         String socketName = InetAddress.getLocalHost().getCanonicalHostName();
         assertEquals("socket name", "localhost:8080", socketName);
-    }
-
-    @Test
-    public void testInterfaces() throws Exception {
-        
     }
 }

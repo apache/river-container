@@ -63,7 +63,7 @@ public class PropertiesFileReaderTest {
 
     /** 
     Check that the MockFileUtility returns the profile directory as the
-    'testfiles' dir.
+    'src/test/files' dir.
     @throws Exception 
     */
     @Test
@@ -71,7 +71,7 @@ public class PropertiesFileReaderTest {
         FileObject fo=fileUtility.getProfileDirectory();
         
         System.out.println("fo=" + fo);
-            assertTrue(fo.toString().endsWith("testfiles"));
+            assertTrue(fo.toString().endsWith("files"));
     }
     
     /**
@@ -121,7 +121,7 @@ public class PropertiesFileReaderTest {
         @Override
         public FileObject getProfileDirectory() throws IOException {
             FileSystemManager fileSystemManager=VFS.getManager();
-            FileObject fo = fileSystemManager.resolveFile(new File("../../testfiles"), ".");
+            FileObject fo = fileSystemManager.resolveFile(new File("src/test/files"), ".");
             
             return fo;
         }
