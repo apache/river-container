@@ -45,13 +45,14 @@
     hence was available in the "extensions" loader.  Here, we'd prefer not to 
     require any changes to the JSDK installation directory.
     -->
-    <cfg:classpath id="systemClassLoader">lib/jsk-policy.jar</cfg:classpath>
+    <cfg:classpath id="systemClassLoader">lib/jsk-policy-2.2.1.jar</cfg:classpath>
     <cfg:classpath id="containerClassLoader" parent="systemClassLoader">
-        lib/RiverSurrogate.jar
+        lib/river-container-core-1.0-SNAPSHOT.jar
         lib/commons-logging-1.1.1.jar
-        lib/commons-vfs-1.0.jar
-        lib/jsk-platform.jar
-        lib/jsk-resources.jar
+        lib/commons-vfs2-2.0.jar
+        lib/jsk-platform-2.2.1.jar
+        lib/jsk-resources-2.2.1.jar
+        lib/regexp-1.3.jar
     </cfg:classpath>
 
     <!--cfg:component class="org.apache.river.container.ShowContextToConsole"/-->

@@ -75,6 +75,7 @@ public class VirtualFileSystemConfiguration
             jre platform.
              */
             log.log(Level.SEVERE, "Problem setting working directory", ex);
+            ex.printStackTrace();
             throw new RuntimeException(ex.getMessage());
         }
 

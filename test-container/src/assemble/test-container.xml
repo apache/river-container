@@ -11,14 +11,31 @@
         <fileSet>
             <outputDirectory>/</outputDirectory>
             <directory>src/main/root</directory> 
-       </fileSet>
+        </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/lib</outputDirectory>
+            <scope>runtime</scope>
+            <!-- It's a mystery to me how these get into the runtime dependencies in the 
+            first place - Greg Trasuk
+            -->
+            <excludes>
+                <exclude>*:maven-*</exclude>
+                <exclude>*:plexus-*</exclude>
+            </excludes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/profile/default/deploy</outputDirectory>
+            <scope>runtime</scope>
+            <!-- It's a mystery to me how these get into the runtime dependencies in the 
+            first place - Greg Trasuk
+            -->
             <includes>
-                <include>*:*</include>
-           </includes>
+                <include>*:reggie-module</include>
+            </includes>
         </dependencySet>
     </dependencySets>
 

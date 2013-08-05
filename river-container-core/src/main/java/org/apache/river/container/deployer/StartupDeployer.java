@@ -109,7 +109,7 @@ public class StartupDeployer {
          */
         List<FileObject> serviceArchives =
                 Utils.findChildrenWithSuffix(deploymentDirectoryFile,
-                org.apache.river.container.Strings.SSAR);
+                org.apache.river.container.Strings.JAR);
         if (serviceArchives != null) {
             log.log(Level.FINE, MessageNames.FOUND_SERVICE_ARCHIVES,
                     new Object[]{serviceArchives.size(), deployDirectory});
