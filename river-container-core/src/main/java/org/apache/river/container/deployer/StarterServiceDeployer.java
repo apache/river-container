@@ -245,7 +245,9 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
         /*
          Setup the liaison configuration.
          */
+        ClassLoader originalContextCl=Thread.currentThread().getContextClassLoader();
         try {
+            Thread.currentThread().setContextClassLoader(cl);
             File workingDir = null;
             if (serviceArchive != null) {
                 workingDir = new File(serviceArchive.getURL().toURI());
@@ -270,19 +272,21 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
                 String contextVarName = cfgEntryNode.jjtGetChild(1).toString();
                 Object contextValue = context.get(contextVarName);
                 if (contextValue != null) {
-                    invokeStatic(cl, configName, 
-                            Strings.PUT_SPECIAL_ENTRY, 
-                            new Class[] {String.class, Object.class}, 
+                    invokeStatic(cl, configName,
+                            Strings.PUT_SPECIAL_ENTRY,
+                            new Class[]{String.class, Object.class},
                             Strings.DOLLAR + varName, contextValue);
                 } else {
-                    log.log(Level.WARNING, MessageNames.MISSING_SPECIAL_VALUE, 
-                            new Object[] {getConfig(), varName, contextVarName});
-                } 
+                    log.log(Level.WARNING, MessageNames.MISSING_SPECIAL_VALUE,
+                            new Object[]{getConfig(), varName, contextVarName});
+                }
             }
         } catch (Exception ex) {
             log.log(Level.WARNING, MessageNames.EXCEPTION_THROWN, Utils.stackTrace(ex));
             throw new ConfigurationException(ex,
                     MessageNames.STARTER_SERVICE_DEPLOYER_FAILED_INIT);
+        } finally {
+            Thread.currentThread().setContextClassLoader(originalContextCl);
         }
     }
 

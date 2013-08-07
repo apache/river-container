@@ -18,11 +18,10 @@
 package org.apache.river.container.liaison;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -33,7 +32,6 @@ import net.jini.config.ConfigurationFile;
 import net.jini.config.ConfigurationNotFoundException;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
-import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
 
 /**
@@ -58,6 +56,10 @@ public class VirtualFileSystemConfiguration
     @param workingDirectory
      */
     public static void setWorkingDirectory(File workingDirectory) {
+        /* Before we do anything, setup the class loader for the vfs manager.
+         */
+        
+        setManagerClassLoader();
         try {
             if (workingDirectory.isDirectory()) {
                 FileObject root = VFS.getManager().toFileObject(workingDirectory);
@@ -81,6 +83,17 @@ public class VirtualFileSystemConfiguration
 
     }
 
+    private static void setManagerClassLoader() {
+        try {
+            Object mgr=VFS.getManager();
+            Method setter=mgr.getClass().getMethod("setClassLoader", new Class[] {ClassLoader.class});
+            setter.invoke(mgr, new Object[] {mgr.getClass().getClassLoader()});
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+        
+    }
+    
     public static FileObject getRootDirectory() {
         return rootDirectory;
     }
