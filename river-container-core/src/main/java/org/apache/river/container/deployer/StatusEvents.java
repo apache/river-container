@@ -30,7 +30,7 @@ interface StatusEvents {
     
     public void stopFailed();
     
-    public void exception(Exception ex);
+    public void exception(Throwable ex);
     
     public void timeout();
 }

@@ -87,6 +87,10 @@ public class StarterServiceLifeCycleSM {
                 new String[]{ getStatus() });
     }
     
+    public void exception(Throwable ex) {
+        logger.log(Level.SEVERE, MessageNames.EXCEPTION_THROWN, ex);
+    }
+    
     public class Idle {
         /*
          * To start from idle means to prepare, and then start.
