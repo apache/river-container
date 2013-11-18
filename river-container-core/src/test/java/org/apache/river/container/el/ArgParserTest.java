@@ -56,11 +56,26 @@ public class ArgParserTest {
         String input = "A B C";
         String[] expected = {"A", "B", "C"};
 
-        String[] actual = UUT.toArgs(input);
+        String[] actual = UUT.toArgs(input, new String[0]);
 
         checkStringArray(expected, actual);
     }
 
+    /**
+     * The arg parser should be called with a string array of input arguments
+     * as well as a "command line".  Where the command line includes "$*",
+     * the input arguments should be added.
+     */
+    @Test
+    public void testArgsSubstitution() {
+        String input ="A B $*";
+        String[] args = {"C", "D"};
+        String[] expected={"A", "B", "C", "D"};
+        
+        String[] actual=UUT.toArgs(input, args);
+        checkStringArray(expected, actual);
+    }
+    
     private void checkStringArray(String[] expected, String[] actual) {
         boolean fail = false;
         if (actual.length != expected.length) {

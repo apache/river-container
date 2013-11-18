@@ -37,6 +37,17 @@
                 <include>*:reggie-module</include>
             </includes>
         </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/profile/client/deploy</outputDirectory>
+            <scope>runtime</scope>
+            <!-- It's a mystery to me how these get into the runtime dependencies in the 
+            first place - Greg Trasuk
+            -->
+            <includes>
+                <include>*:browser-module</include>
+            </includes>
+        </dependencySet>
     </dependencySets>
 
 </assembly>

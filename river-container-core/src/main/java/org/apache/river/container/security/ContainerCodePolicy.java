@@ -26,51 +26,65 @@ import java.util.logging.Logger;
 import org.apache.river.container.MessageNames;
 
 /**
- Implements the base policy for the container: Anything loaded by the same
-classloader (or one of its ancestors) as this policy has AllPermission.  
-Anything loaded by a different classloader has no permissions (and will 
-assumedly be granted appropriate permissions dynamically).
- @author trasukg
+ * Implements the base policy for the container: Anything loaded by the same
+ * classloader (or one of its ancestors) as this policy has AllPermission.
+ * Anything loaded by a different classloader has no permissions (and will
+ * assumedly be granted appropriate permissions dynamically).
+ *
+ * @author trasukg
  */
 public class ContainerCodePolicy extends Policy {
-    private static final Logger log=
+
+    private static final Logger log =
             Logger.getLogger(ContainerCodePolicy.class.getName(),
             MessageNames.BUNDLE_NAME);
-    
-    List<ClassLoader> privilegedClassLoaders=new ArrayList<ClassLoader>();
+    List<ClassLoader> privilegedClassLoaders = new ArrayList<ClassLoader>();
 
     public ContainerCodePolicy(ClassLoader bootstrapClassLoader) {
         privilegedClassLoaders.add(bootstrapClassLoader);
-        ClassLoader cl=this.getClass().getClassLoader();
+        ClassLoader cl = this.getClass().getClassLoader();
         while (cl != null) {
             privilegedClassLoaders.add(cl);
-            cl=cl.getParent();
+            cl = cl.getParent();
         }
         allPermissions.add(new AllPermission());
         allPermissions.setReadOnly();
         noPermissions.setReadOnly();
     }
-   
-    private PermissionCollection allPermissions=new Permissions();
-    private PermissionCollection noPermissions=new Permissions();
-    
+    private PermissionCollection allPermissions = new Permissions();
+    private PermissionCollection noPermissions = new Permissions();
+
     @Override
     public PermissionCollection getPermissions(ProtectionDomain domain) {
-        if (privilegedClassLoaders.contains(domain.getClassLoader()) ) {
+        if (privilegedClassLoaders.contains(domain.getClassLoader())) {
             return copyPermissions(allPermissions);
         } else {
             log.log(Level.FINE, MessageNames.POLICY_DECLINED,
-                    new Object[] { domain.getClassLoader() });
+                    new Object[]{domain.getClassLoader()});
             return copyPermissions(noPermissions);
         }
     }
-    
+
+    /**
+     * This seems to be necessary to allow the com.sun.rmi.server.LoaderHandler
+     * class to read the marshalled object.  LoaderHandler will call 
+     * this method to get the permissions that are granted to all classes, which
+     * in the case of the container, is none.  But the permissions collection
+     * must be writable.
+     * @param codesource
+     * @return 
+     */
+    @Override
+    public PermissionCollection getPermissions(CodeSource codesource) {
+        return copyPermissions(noPermissions);
+    }
+
     PermissionCollection copyPermissions(PermissionCollection orig) {
-        PermissionCollection pc=new Permissions();
-        Enumeration perms=orig.elements();
-        while(perms.hasMoreElements()) {
+        PermissionCollection pc = new Permissions();
+        Enumeration perms = orig.elements();
+        while (perms.hasMoreElements()) {
             pc.add((Permission) perms.nextElement());
         }
-        return pc; 
+        return pc;
     }
 }

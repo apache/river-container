@@ -121,12 +121,12 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
         }
     }
 
-    public String[] constructArgs(String argLine) {
+    public String[] constructArgs(String argLine, String[] serviceArgs) {
         String[] args = null;
         if (argLine == null) {
             args = new String[0];
         } else {
-            args = argsParser.toArgs(argLine);
+            args = argsParser.toArgs(argLine, serviceArgs);
         }
         return args;
     }
@@ -366,10 +366,10 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
         env.setWorkingContext(contextualWorkManager.createContext(env.getServiceName()));
     }
     
-    void launchService(ApplicationEnvironment env) throws FileSystemException, IOException {
+    void launchService(ApplicationEnvironment env, String[] serviceArgs) throws FileSystemException, IOException {
         Properties startProps = readStartProperties(env.getServiceRoot());
         String argLine = startProps.getProperty(Strings.START_PARAMETERS);
-        final String[] args = constructArgs(argLine);
+        final String[] args = constructArgs(argLine, serviceArgs);
 
         launchService(env, startProps, args);
         log.log(Level.INFO, MessageNames.COMPLETED_SERVICE_DEPLOYMENT, env.getServiceName());

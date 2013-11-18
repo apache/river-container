@@ -15,21 +15,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.river.container.el;
+package org.apache.river.container;
+
+import java.util.ResourceBundle;
 
 /**
- *
+ * Load the messages resource bundle into the context.
  * @author trasukg
  */
-public interface ArgsParser {
-
-    /**
-     * Take a command line as one string and break it into a set
-     * of arguments as expected by main(String[] args).
-     *
-     * @param input
-     * @return
-     */
-    String[] toArgs(String input, String[] args);
+public class MessagesResource {
     
+    @Injected(style = InjectionStyle.BY_TYPE)
+    Context context;
+    
+    /**
+     * Load the resource bundle that contains messages, and put it into the 
+     * context.
+     */
+    @Init
+    public void init() {
+        ResourceBundle messages=ResourceBundle.getBundle(MessageNames.BUNDLE_NAME);
+        context.put(Strings.MESSAGES,messages);
+    }
 }

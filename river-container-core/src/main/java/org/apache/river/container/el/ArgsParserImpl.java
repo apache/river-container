@@ -20,6 +20,7 @@ package org.apache.river.container.el;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import org.apache.river.container.Strings;
 
 /**
  *
@@ -34,11 +35,19 @@ public class ArgsParserImpl implements ArgsParser {
     @return 
     */
     @Override
-    public String[] toArgs(String input) {
+    public String[] toArgs(String input, String[] inputArgs) {
         List<String> args=new ArrayList<String>();
         StringTokenizer tok=new StringTokenizer(input," ");
         while(tok.hasMoreTokens()) {
-            args.add(tok.nextToken());
+            String token=tok.nextToken();
+            
+            if (Strings.DOLLAR_STAR.equals(token)) {
+                for(String arg: inputArgs) {
+                    args.add(arg);
+                }
+            } else {
+                args.add(token);
+            }
         }
         return args.toArray(new String[0]);
     }

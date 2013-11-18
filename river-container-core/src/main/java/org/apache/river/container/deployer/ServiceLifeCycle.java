@@ -29,6 +29,8 @@ public interface ServiceLifeCycle {
     
     public void start();
     
+    public void startWithArgs(String[] args);
+    
     public void stop();
     
     public void prepare();

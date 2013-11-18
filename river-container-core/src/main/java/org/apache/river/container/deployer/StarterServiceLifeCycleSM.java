@@ -82,6 +82,11 @@ public class StarterServiceLifeCycleSM {
                 new String[]{ getStatus() });
     }
     
+    public void startWithArgs(String[] args) {
+        logger.log(Level.FINE,MessageNames.RECEIVED_START_WITH_ARGS,
+                new String[]{ getStatus() });
+    }
+    
     public class Idle {
         /*
          * To start from idle means to prepare, and then start.
@@ -97,6 +102,24 @@ public class StarterServiceLifeCycleSM {
                         deployer.prepareService(appEnv);
                         eventProxy.prepareSucceeded();
                         lifeCycleProxy.start();
+                    } catch (Exception ex) {
+                        eventProxy.exception(ex);
+                    }
+                }
+            };
+            deployer.workManager.queueTask(null, command);
+        }
+
+        @Transition(Preparing.class)
+        public void startWithArgs(final String[] args) {
+            exceptions.clear();
+            Runnable command = new Runnable() {
+                public void run() {
+                    /* Prepare the application environment. */
+                    try {
+                        deployer.prepareService(appEnv);
+                        eventProxy.prepareSucceeded();
+                        lifeCycleProxy.startWithArgs(args);
                     } catch (Exception ex) {
                         eventProxy.exception(ex);
                     }
@@ -145,7 +168,24 @@ public class StarterServiceLifeCycleSM {
                 public void run() {
                     /* Prepare the application environment. */
                     try {
-                        deployer.launchService(appEnv);
+                        deployer.launchService(appEnv, new String[0]);
+                        eventProxy.startSucceeded();
+                    } catch (Exception ex) {
+                        eventProxy.exception(ex);
+                    }
+                }
+            };
+            deployer.workManager.queueTask( null, command);
+
+        }
+        
+        @Transition(Starting.class)
+        public void startWithArgs(final String[] args) {
+            Runnable command = new Runnable() {
+                public void run() {
+                    /* Prepare the application environment. */
+                    try {
+                        deployer.launchService(appEnv, args);
                         eventProxy.startSucceeded();
                     } catch (Exception ex) {
                         eventProxy.exception(ex);

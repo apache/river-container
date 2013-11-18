@@ -64,6 +64,7 @@
     
     <cfg:property name="deploymentDirectory" value="deploy"/>
 
+    <cfg:component class="org.apache.river.container.MessagesResource"/>
     <cfg:component class="org.apache.river.container.SystemClassloaderInitializer"/>
     <cfg:component class="org.apache.river.container.CommandLineArgumentParser"/>
     <cfg:component class="org.apache.river.container.MBeanRegistrar"/>

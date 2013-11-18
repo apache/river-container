@@ -118,14 +118,15 @@ public class ClassServer implements CodebaseHandler {
                     });
         }
         int initialPort = Integer.parseInt(initialPortStr);
+        for(int port=initialPort; port<initialPort+100 ;port++)
         try {
-            server.bind(new InetSocketAddress(initialPort));
+            server.bind(new InetSocketAddress(port));
             logger.log(Level.INFO, MessageNames.CLASS_SERVER_ESTABLISHED,
                     new Object[]{server.getLocalSocketAddress(),
                         server.getLocalPort()});
+            break;
         } catch (BindException be) {
-            IOException ioe = new IOException("failure to bind to port: " + initialPort, be);
-            throw ioe;
+            logger.log(Level.FINE, MessageNames.PORT_IN_USE, new Integer[] {port});
         }
     }
 
