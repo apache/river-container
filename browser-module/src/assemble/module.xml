@@ -27,7 +27,7 @@
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
 
-  <fileSets>
+    <fileSets>
 
         <fileSet>
             <directory>${basedir}/src/main/root</directory>
@@ -38,24 +38,17 @@
             <outputDirectory>/</outputDirectory>
         </fileSet>
   
-  </fileSets>    
-  <dependencySets>
+    </fileSets>    
+    <dependencySets>
      
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/lib</outputDirectory>
             <includes>
-                <include>org.apache.river:browser</include>
+                <include>*:browser</include>
             </includes>
         </dependencySet>
         
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/lib-dl</outputDirectory>
-            <includes>
-                <include>org.apache.river:browser-dl</include>
-            </includes>
-        </dependencySet>
     </dependencySets>
 
 </assembly>

@@ -79,7 +79,6 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
     private String myName = null;
     @Injected(style = InjectionStyle.BY_TYPE)
     private CodebaseHandler codebaseHandler = null;
-    
     private String config = Strings.STARTER_SERVICE_DEPLOYER_CONFIG;
     private ASTconfig configNode = null;
 
@@ -92,23 +91,19 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
     }
     @Injected(style = InjectionStyle.BY_TYPE)
     private PropertiesFileReader propertiesFileReader = null;
-    
     @Injected(style = InjectionStyle.BY_TYPE)
     private ArgsParser argsParser = null;
-    
     @Injected(style = InjectionStyle.BY_TYPE)
     WorkManager workManager = null;
-    
-    @Injected(style=InjectionStyle.BY_TYPE)
-    ContextualWorkManager contextualWorkManager=null;
-    
+    @Injected(style = InjectionStyle.BY_TYPE)
+    ContextualWorkManager contextualWorkManager = null;
     @Injected(style = InjectionStyle.BY_TYPE)
     private DynamicPolicyProvider securityPolicy = null;
 
     public void addPlatformCodebaseJars(CodebaseContext codebaseContext) throws IOException {
         ASTcodebase codebaseNode = (ASTcodebase) configNode.search(new Class[]{
-                    ASTconfig.class, ASTclassloader.class, ASTcodebase.class
-                }).get(0);
+            ASTconfig.class, ASTclassloader.class, ASTcodebase.class
+        }).get(0);
         /*
          Register the platform codebase jars with the codebase service.
          */
@@ -143,7 +138,7 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
          Include platform jars from the container's lib directory.
          */
         ASTclasspath platformJarSpec = (ASTclasspath) configNode.search(new Class[]{ASTconfig.class,
-                    ASTclassloader.class, ASTjars.class, ASTclasspath.class}).get(0);
+            ASTclassloader.class, ASTjars.class, ASTclasspath.class}).get(0);
         addPlatformJarsToClassloader(platformJarSpec, cl);
         addLibDirectoryJarsToClasspath(serviceRoot, cl);
 
@@ -184,10 +179,13 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
          Register the service's codebase jars with the codebase service.
          */
         FileObject libDlDir = serviceRoot.resolveFile(Strings.LIB_DL);
-        List<FileObject> dljarFiles = Utils.findChildrenWithSuffix(libDlDir,
-                Strings.DOT_JAR);
-        for (FileObject jarFile : dljarFiles) {
-            codebaseContext.addFile(jarFile);
+        /* Don't bother if there is no lib-dl (e.g. for simple clients) */
+        if (libDlDir.exists()) {
+            List<FileObject> dljarFiles = Utils.findChildrenWithSuffix(libDlDir,
+                    Strings.DOT_JAR);
+            for (FileObject jarFile : dljarFiles) {
+                codebaseContext.addFile(jarFile);
+            }
         }
     }
 
@@ -209,10 +207,9 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
          Launch the service.
          */
         log.log(Level.FINE, MessageNames.CALLING_MAIN, new Object[]{
-                    startClassName, Utils.format(args)
-                });
+            startClassName, Utils.format(args)
+        });
         Runnable task = new Runnable() {
-
             @Override
             public void run() {
                 try {
@@ -235,7 +232,7 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
             throw new LocalizedRuntimeException(MessageNames.BUNDLE_NAME,
                     MessageNames.CANT_READ_START_PROPERTIES,
                     new Object[]{Strings.START_PROPERTIES,
-                        serviceRoot.getName().getBaseName()});
+                serviceRoot.getName().getBaseName()});
         }
         Properties startProps = propertiesFileReader.getProperties(startProperties);
         return startProps;
@@ -245,7 +242,7 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
         /*
          Setup the liaison configuration.
          */
-        ClassLoader originalContextCl=Thread.currentThread().getContextClassLoader();
+        ClassLoader originalContextCl = Thread.currentThread().getContextClassLoader();
         try {
             Thread.currentThread().setContextClassLoader(cl);
             File workingDir = null;
@@ -299,8 +296,8 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
         FileObject configFile = fileUtility.getProfileDirectory().resolveFile(config);
         InputStream in = configFile.getContent().getInputStream();
         configNode = DeployerConfigParser.parseConfig(in);
-        log.log(Level.FINE,MessageNames.STARTER_SERVICE_DEPLOYER_INITIALIZED, 
-                new Object[] {myName} );
+        log.log(Level.FINE, MessageNames.STARTER_SERVICE_DEPLOYER_INITIALIZED,
+                new Object[]{myName});
     }
 
     public ServiceLifeCycle deployServiceArchive(FileObject serviceArchive) throws IOException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException {
@@ -311,7 +308,7 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
                 serviceArchive.getFileSystem().getFileSystemManager().createFileSystem(Strings.JAR, serviceArchive));
         String serviceName = findServiceName(env.getServiceArchive(), env.getServiceRoot());
         env.setServiceName(serviceName);
-        ServiceLifeCycle slc=StarterServiceLifeCycleSM.newStarterServiceLifeCycle(env, this);
+        ServiceLifeCycle slc = StarterServiceLifeCycleSM.newStarterServiceLifeCycle(env, this);
         return slc;
     }
 
@@ -330,7 +327,7 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
     }
 
     void prepareService(ApplicationEnvironment env) throws IOException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException {
-        
+
         CodeSource serviceCodeSource =
                 new CodeSource(findServiceURL(env.getServiceArchive(), env.getServiceRoot()),
                 new Certificate[0]);
@@ -338,7 +335,7 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
                 new Object[]{env.getServiceName(), serviceCodeSource});
         VirtualFileSystemClassLoader cl = createServiceClassloader(env.getServiceRoot(), serviceCodeSource);
         env.setClassLoader(cl);
-        
+
         /*
          Create a codebase context.
          */
@@ -359,13 +356,13 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
         Permission[] perms = createPermissionsInClassloader(cl);
         grantPermissions(cl, perms);
         setupLiaisonConfiguration(env.getServiceArchive(), env.getServiceRoot(), cl);
-        
+
         /*
          * Create a working context (work manager).
          */
         env.setWorkingContext(contextualWorkManager.createContext(env.getServiceName()));
     }
-    
+
     void launchService(ApplicationEnvironment env, String[] serviceArgs) throws FileSystemException, IOException {
         Properties startProps = readStartProperties(env.getServiceRoot());
         String argLine = startProps.getProperty(Strings.START_PARAMETERS);
@@ -451,27 +448,27 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
         constructor.setAccessible(true);
         return constructor.newInstance(parms, null);
     }
-    
+
     /**
-     * Attempt to stop the service in an orderly fashion.
-     * Go to the service, see if it implements Administrable, then get the 
-     * admin proxy and see if it implements DestroyAdmin.  If so, call it.
-     * @param env 
+     * Attempt to stop the service in an orderly fashion. Go to the service, see
+     * if it implements Administrable, then get the admin proxy and see if it
+     * implements DestroyAdmin. If so, call it.
+     *
+     * @param env
      */
-    public void stopService(ApplicationEnvironment env)  {
+    public void stopService(ApplicationEnvironment env) {
         /* Option 1 - Service has a getAdmin() method - it probably implements
          * Administrable.
          */
-        Object serviceInstance=env.getServiceInstance();
-        Method getAdmin=null;
+        Object serviceInstance = env.getServiceInstance();
+        Method getAdmin = null;
         try {
-            getAdmin=serviceInstance.getClass().getMethod(Strings.GET_ADMIN, new Class[0]);
+            getAdmin = serviceInstance.getClass().getMethod(Strings.GET_ADMIN, new Class[0]);
         } catch (Exception ex) {
             // Silent catch - leave it null;
         }
         if (getAdmin != null) {
-            
         }
-        
+
     }
 }

@@ -11,7 +11,8 @@
         <module>test-container</module>
         <module>reggie-module</module>
         <module>browser-module</module>
-    </modules>
+    <module>browser</module>
+  </modules>
   
     <build>
         <pluginManagement>
