@@ -12,8 +12,12 @@
         <module>reggie-module</module>
         <module>browser-module</module>
     <module>browser</module>
+        <module>user-docs</module>
+    <module>product</module>
   </modules>
-  
+  <properties>
+      <jsk-version>2.2.2</jsk-version>
+  </properties>
     <build>
         <pluginManagement>
             <plugins>             

@@ -49,13 +49,13 @@
         <dependency>
             <groupId>net.jini</groupId>
             <artifactId>jsk-platform</artifactId>
-            <version>2.2.1</version>
+            <version>${jsk-version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>net.jini</groupId>
             <artifactId>jsk-resources</artifactId>
-            <version>2.2.1</version>
+            <version>${jsk-version}</version>
             <scope>compile</scope>
         </dependency>
     

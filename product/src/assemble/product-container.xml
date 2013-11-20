@@ -1,0 +1,53 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+    <id>test-container</id>
+    <formats>
+        <format>dir</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+
+    <fileSets>
+        <fileSet>
+            <outputDirectory>/</outputDirectory>
+            <directory>src/main/root</directory> 
+        </fileSet>
+    </fileSets>
+    <dependencySets>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/lib</outputDirectory>
+            <scope>runtime</scope>
+            <!-- It's a mystery to me how these get into the runtime dependencies in the 
+            first place - Greg Trasuk
+            -->
+            <excludes>
+                <exclude>*:maven-*</exclude>
+                <exclude>*:plexus-*</exclude>
+            </excludes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/profile/default/deploy</outputDirectory>
+            <scope>runtime</scope>
+            <!-- It's a mystery to me how these get into the runtime dependencies in the 
+            first place - Greg Trasuk
+            -->
+            <includes>
+                <include>*:reggie-module</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/profile/client/deploy</outputDirectory>
+            <scope>runtime</scope>
+            <!-- It's a mystery to me how these get into the runtime dependencies in the 
+            first place - Greg Trasuk
+            -->
+            <includes>
+                <include>*:browser-module</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
+
+</assembly>
