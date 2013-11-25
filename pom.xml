@@ -10,14 +10,15 @@
         <module>river-container-core</module>
         <module>test-container</module>
         <module>reggie-module</module>
+        <module>transient-mahalo-module</module>
         <module>browser-module</module>
-    <module>browser</module>
+        <module>browser</module>
         <module>user-docs</module>
-    <module>product</module>
-  </modules>
-  <properties>
-      <jsk-version>2.2.2</jsk-version>
-  </properties>
+        <module>product</module>
+    </modules>
+    <properties>
+        <jsk-version>2.2.2</jsk-version>
+    </properties>
     <build>
         <pluginManagement>
             <plugins>             

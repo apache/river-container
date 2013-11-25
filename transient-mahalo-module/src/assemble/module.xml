@@ -44,10 +44,7 @@
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/lib</outputDirectory>
-            <!-- jsk jars are already provided by the container. -->
-            <excludes>
-                <exclude>*:jsk-*</exclude>
-            </excludes>
+            
         </dependencySet>
         
         <dependencySet>
@@ -56,10 +53,6 @@
             <includes>
                 <include>*:*-dl</include>
             </includes>
-            <!-- jsk jars are already provided by the container. -->
-            <excludes>
-                <exclude>*:jsk-*</exclude>
-            </excludes>
         </dependencySet>
     </dependencySets>
 
