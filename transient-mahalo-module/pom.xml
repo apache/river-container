@@ -33,14 +33,14 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.river</groupId>
-            <artifactId>reggie</artifactId>
+            <artifactId>mahalo</artifactId>
             <version>${jsk-version}</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.river</groupId>
-            <artifactId>reggie-dl</artifactId>
+            <artifactId>mahalo-dl</artifactId>
             <version>${jsk-version}</version>
             <scope>compile</scope>
         </dependency>

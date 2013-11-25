@@ -45,7 +45,7 @@
     hence was available in the "extensions" loader.  Here, we'd prefer not to 
     require any changes to the JSDK installation directory.
     -->
-    <cfg:classpath id="systemClassLoader">lib/jsk-policy-2.2.1.jar</cfg:classpath>
+    <cfg:classpath id="systemClassLoader">lib/jsk-policy-${jsk-version}.jar</cfg:classpath>
     <cfg:classpath id="containerClassLoader" parent="systemClassLoader">
         lib/river-container-core-1.0-SNAPSHOT.jar
         lib/commons-logging-1.1.1.jar
