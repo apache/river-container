@@ -61,6 +61,7 @@ public class StarterServiceLifeCycleSM {
         machine.lifeCycleProxy = (ServiceLifeCycle) machine.eventProxy;
         return machine.lifeCycleProxy;
     }
+
     @State({Idle.class, Preparing.class, Prepared.class, Starting.class, 
         Failed.class, Running.class, Stopping.class, DirtyShutdown.class,
         Idle.class})

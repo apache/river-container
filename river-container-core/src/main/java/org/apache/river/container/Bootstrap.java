@@ -17,6 +17,10 @@
  */
 package org.apache.river.container;
 
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -39,22 +43,23 @@ import org.apache.river.container.config.*;
 import org.xml.sax.SAXException;
 
 /**
- Bootstrap loader for the container. Performs roughly the following: <ul>
- <li>Based on the configuration parameter fed in at the command line, determine
- the configuration directory and the config file.</li> <li>Read the
- configuration file</li> <li>Based on the classpath declared in the config file,
- create the container's classloader.</li> <li>Using that classloader, create the
- context.</li> <li>Load any command-line parameters into the context</li>
- <li>Create all the elements (beans, discovery sets, etc) that are called out in
- the config file and put them into the context. This will cause those beans to
- setup and initialize themselves.</li> </li>
-
- @author trasukg
+ * Bootstrap loader for the container. Performs roughly the following: <ul>
+ * <li>Based on the configuration parameter fed in at the command line,
+ * determine the configuration directory and the config file.</li> <li>Read the
+ * configuration file</li> <li>Based on the classpath declared in the config
+ * file, create the container's classloader.</li> <li>Using that classloader,
+ * create the context.</li> <li>Load any command-line parameters into the
+ * context</li>
+ * <li>Create all the elements (beans, discovery sets, etc) that are called out
+ * in the config file and put them into the context. This will cause those beans
+ * to setup and initialize themselves.</li> </li>
+ *
+ * @author trasukg
  */
 public class Bootstrap {
 
-    private static final Logger log =
-            Logger.getLogger(Bootstrap.class.getName(), MessageNames.BUNDLE_NAME);
+    private static final Logger log
+            = Logger.getLogger(Bootstrap.class.getName(), MessageNames.BUNDLE_NAME);
 
     public static void main(String args[]) {
         try {
@@ -117,37 +122,37 @@ public class Bootstrap {
             List<String> seen,
             Map<String, Classpath> classpaths,
             String id) throws MalformedURLException {
-        if (classLoaders.containsKey(id ) ){
+        if (classLoaders.containsKey(id)) {
             return classLoaders.get(id);
         }
         if (seen.contains(id)) {
-            throw new ConfigurationException(MessageNames.CIRCULAR_CLASSPATH, id);          
+            throw new ConfigurationException(MessageNames.CIRCULAR_CLASSPATH, id);
         }
         // Add the id to the list of classloaders we have attempted to build.
         seen.add(id);
-        Classpath classpath=classpaths.get(id);
-        if (classpath==null) {
+        Classpath classpath = classpaths.get(id);
+        if (classpath == null) {
             throw new ConfigurationException(MessageNames.CLASSPATH_UNDEFINED, id);
         }
-        String parentClasspathId=classpath.getParent();
-        ClassLoader parentClassLoader=null;
-        if (parentClasspathId!=null && !Strings.EMPTY.equals(parentClasspathId) ){
-            parentClassLoader=resolveClassLoader(classLoaders, seen, classpaths, parentClasspathId);
+        String parentClasspathId = classpath.getParent();
+        ClassLoader parentClassLoader = null;
+        if (parentClasspathId != null && !Strings.EMPTY.equals(parentClasspathId)) {
+            parentClassLoader = resolveClassLoader(classLoaders, seen, classpaths, parentClasspathId);
         } else {
             /* Should be the 'extension' classloader. */
-            parentClassLoader=Bootstrap.class.getClassLoader().getParent();
+            parentClassLoader = Bootstrap.class.getClassLoader().getParent();
         }
         URL[] classpathUrls;
         classpathUrls = findClasspathURLS(classpath.getValue());
-        
+
         SettableCodebaseClassLoader classLoader = new SettableCodebaseClassLoader(classpathUrls,
                 parentClassLoader);
         classLoaders.put(id, classLoader);
         log.log(Level.FINE, MessageNames.CONFIGURED_CLASSPATH, new Object[]{
-                    id,
-                    Utils.format(classpathUrls)});
+            id,
+            Utils.format(classpathUrls)});
         seen.remove(id);
-        return classLoader;      
+        return classLoader;
     }
 
     static void initializeContainer(String args[]) throws SAXException, JAXBException, FileNotFoundException, MalformedURLException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, ConfigurationException, Exception {
@@ -228,6 +233,16 @@ public class Bootstrap {
             Class compClass = Class.forName(c.getClazz(), true, classLoader);
             String name = c.getName();
             Object instance = compClass.newInstance();
+            for (Property p : c.getProperty()) {
+                setPropertyOnComponent(instance, p.getName(), p.getValue());
+                log.log(Level.FINER, MessageNames.SET_PROPERTY_ON_COMPONENT,
+                        new Object[] { 
+                            p.getName(),
+                            c.getClazz(),
+                            c.getName(),
+                            p.getValue()
+                        });
+            }
             if (name == null || name.trim().length() == 0) {
                 putMethod.invoke(context, instance);
             } else {
@@ -250,6 +265,42 @@ public class Bootstrap {
             throw new ConfigurationException(MessageNames.UNSUPPORTED_ELEMENT, element.getClass().getName());
         }
     }
+
+    private static void setPropertyOnComponent(Object instance, String propertyName, String propertyValue) {
+        try {
+            BeanInfo info = Introspector.getBeanInfo(instance.getClass());
+            PropertyDescriptor pd=findPropertyDescriptor(info, propertyName);
+            Object convertedValue=convert(propertyValue, pd.getPropertyType());
+            pd.getWriteMethod().invoke(instance, convertedValue);
+        } catch (Throwable t) {
+            throw new ConfigurationException(t, MessageNames.FAILED_TO_SET_PROPERTY, propertyName, instance.getClass(), propertyValue);
+        }
+    }
+    
+    private static PropertyDescriptor findPropertyDescriptor(BeanInfo info, String propertyName) throws IntrospectionException {
+        for (PropertyDescriptor possible: info.getPropertyDescriptors()) {
+            if (propertyName.equals(possible.getName())) {
+                return possible;
+            }
+        }
+        throw new IntrospectionException(propertyName);
+    }
+    
+    private static Object convert(String value, Class targetType) {
+        if (targetType.equals(Boolean.class)  || targetType.equals(boolean.class)) {
+            return Boolean.parseBoolean(value);
+        } else if (targetType.equals(String.class)) {
+            return value;
+        } else if (targetType.equals(Integer.class) || targetType.equals(int.class)) {
+            return Integer.parseInt(value);
+        } else if (targetType.equals(Double.class) || targetType.equals(double.class)) {
+            return Double.parseDouble(value);
+        } else if (targetType.equals(Float.class) || targetType.equals(float.class)) {
+            return Float.parseFloat(value);
+        }
+        throw new UnsupportedOperationException();
+    }
+    
     /*
      static URL[] findClasspathURLS(ContainerConfig containerConfig) throws
      MalformedURLException { String classpathStr =

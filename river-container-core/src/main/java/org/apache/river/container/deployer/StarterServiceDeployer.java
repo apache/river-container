@@ -31,14 +31,20 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.security.CodeSource;
 import java.security.Permission;
+import java.security.PermissionCollection;
+import java.security.Permissions;
 import java.security.Principal;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.jini.security.GrantPermission;
 import net.jini.security.policy.DynamicPolicyProvider;
+import net.jini.security.policy.UmbrellaGrantPermission;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileType;
@@ -69,8 +75,8 @@ import org.apache.river.container.work.WorkManager;
  */
 public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
 
-    private static final Logger log =
-            Logger.getLogger(StarterServiceDeployer.class.getName(), MessageNames.BUNDLE_NAME);
+    private static final Logger log
+            = Logger.getLogger(StarterServiceDeployer.class.getName(), MessageNames.BUNDLE_NAME);
     @Injected(style = InjectionStyle.BY_TYPE)
     private FileUtility fileUtility = null;
     @Injected(style = InjectionStyle.BY_TYPE)
@@ -132,8 +138,8 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
                 new Class[]{ASTconfig.class, ASTclassloader.class, ASTparent.class}).get(0).jjtGetChild(0).toString();
         log.log(Level.FINE, MessageNames.SERVICE_PARENT_CLASSLOADER_IS, parentLoaderName);
         ClassLoader parentLoader = (ClassLoader) context.get(parentLoaderName);
-        VirtualFileSystemClassLoader cl =
-                createChildOfGivenClassloader(parentLoader, codeSource);
+        VirtualFileSystemClassLoader cl
+                = createChildOfGivenClassloader(parentLoader, codeSource);
         /*
          Include platform jars from the container's lib directory.
          */
@@ -169,8 +175,8 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
         /*
          Create the service classloader.
          */
-        VirtualFileSystemClassLoader cl =
-                new VirtualFileSystemClassLoader(null, parent, codeSource);
+        VirtualFileSystemClassLoader cl
+                = new VirtualFileSystemClassLoader(null, parent, codeSource);
         return cl;
     }
 
@@ -232,7 +238,7 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
             throw new LocalizedRuntimeException(MessageNames.BUNDLE_NAME,
                     MessageNames.CANT_READ_START_PROPERTIES,
                     new Object[]{Strings.START_PROPERTIES,
-                serviceRoot.getName().getBaseName()});
+                        serviceRoot.getName().getBaseName()});
         }
         Properties startProps = propertiesFileReader.getProperties(startProperties);
         return startProps;
@@ -252,6 +258,7 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
                 workingDir = new File(serviceRoot.getURL().toURI());
 
             }
+           
             grantPermissions(cl,
                     new Permission[]{new FilePermission(workingDir.getAbsolutePath(), Strings.READ)});
             Utils.logClassLoaderHierarchy(log, Level.FINE, this.getClass());
@@ -328,9 +335,9 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
 
     void prepareService(ApplicationEnvironment env) throws IOException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException {
 
-        CodeSource serviceCodeSource =
-                new CodeSource(findServiceURL(env.getServiceArchive(), env.getServiceRoot()),
-                new Certificate[0]);
+        CodeSource serviceCodeSource
+                = new CodeSource(findServiceURL(env.getServiceArchive(), env.getServiceRoot()),
+                        new Certificate[0]);
         log.log(Level.INFO, MessageNames.CODESOURCE_IS,
                 new Object[]{env.getServiceName(), serviceCodeSource});
         VirtualFileSystemClassLoader cl = createServiceClassloader(env.getServiceRoot(), serviceCodeSource);
@@ -339,8 +346,8 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
         /*
          Create a codebase context.
          */
-        CodebaseContext codebaseContext =
-                codebaseHandler.createContext(env.getServiceName());
+        CodebaseContext codebaseContext
+                = codebaseHandler.createContext(env.getServiceName());
         env.setCodebaseContext(codebaseContext);
         addPlatformCodebaseJars(codebaseContext);
         exportServiceCodebaseJars(env.getServiceRoot(), codebaseContext);
@@ -421,12 +428,32 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
 
     private void grantPermissions(ClassLoader cl, Permission[] perms) {
         try {
+            perms=expandUmbrella(perms);
             Class clazz = Class.forName(VirtualFileSystemConfiguration.class.getName(), true, cl);
             securityPolicy.grant(clazz, new Principal[0], perms);
 
         } catch (Throwable t) {
             throw new ConfigurationException(MessageNames.FAILED_DEPLOY_SERVICE, t);
         }
+    }
+
+    private static Permission[] expandUmbrella(Permission[] perms) {
+        PermissionCollection pc=new Permissions();
+        
+        for (Permission p: perms) {
+            pc.add(p);
+        }
+        if (pc.implies(new UmbrellaGrantPermission())) {
+            List l = Collections.list(pc.elements());
+            pc.add(new GrantPermission(
+                    (Permission[]) l.toArray(new Permission[l.size()])));
+        }
+        List<Permission> permList=new ArrayList<Permission>();
+        
+        for (Enumeration<Permission> en=pc.elements(); en.hasMoreElements();) {
+            permList.add(en.nextElement());
+        }
+        return permList.toArray(new Permission[0]);
     }
 
     private Object instantiateService(ClassLoader cl, String className, String[] parms)

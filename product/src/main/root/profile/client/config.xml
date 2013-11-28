@@ -39,13 +39,11 @@
 
     <!-- Deployer for 'service-starter'-style applications. -->
     <cfg:component class="org.apache.river.container.deployer.StarterServiceDeployer">
-        <cfg:property name="config" value="service-starter.cfg"/>
-        <cfg:property name="deployDirectory" value="deploy"/>
+        <cfg:property name="config" value="client-app.cfg"/>
     </cfg:component>
     
     <!-- Deployer for 'service-starter'-style applications. -->
     <cfg:component class="org.apache.river.container.deployer.ClientAppDeployer">
-        <cfg:property name="config" value="client-app.cfg"/>
         <cfg:property name="deployDirectory" value="deploy"/>
     </cfg:component>
     
