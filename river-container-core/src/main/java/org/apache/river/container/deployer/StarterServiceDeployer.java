@@ -207,7 +207,7 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
         }
     }
 
-    public void launchService(final ApplicationEnvironment env, Properties startProps, final String[] args) {
+    public void launchService(final ApplicationEnvironment env, Properties startProps, final String[] args) throws ClassNotFoundException {
         final String startClassName = startProps.getProperty(Strings.START_CLASS);
         /*
          Launch the service.
@@ -215,16 +215,33 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
         log.log(Level.FINE, MessageNames.CALLING_MAIN, new Object[]{
             startClassName, Utils.format(args)
         });
-        Runnable task = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    env.setServiceInstance(instantiateService(env.getClassLoader(), startClassName, args));
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
+        Runnable task=null;
+        if (hasServiceStarterConstructor(env.getClassLoader(), startClassName)) {
+            task = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        env.setServiceInstance(instantiateService(env.getClassLoader(), startClassName, args));
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
-            }
-        };
+            };
+        } else if (hasMain(env.getClassLoader(), startClassName)) {
+            task = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        callMain(env.getClassLoader(), startClassName, args);
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            };
+            
+        } else {
+            throw new UnsupportedOperationException();
+        }
         env.getWorkingContext().getWorkManager().queueTask(env.getClassLoader(), task);
     }
 
@@ -258,7 +275,7 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
                 workingDir = new File(serviceRoot.getURL().toURI());
 
             }
-           
+
             grantPermissions(cl,
                     new Permission[]{new FilePermission(workingDir.getAbsolutePath(), Strings.READ)});
             Utils.logClassLoaderHierarchy(log, Level.FINE, this.getClass());
@@ -370,7 +387,7 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
         env.setWorkingContext(contextualWorkManager.createContext(env.getServiceName()));
     }
 
-    void launchService(ApplicationEnvironment env, String[] serviceArgs) throws FileSystemException, IOException {
+    void launchService(ApplicationEnvironment env, String[] serviceArgs) throws FileSystemException, IOException, ClassNotFoundException {
         Properties startProps = readStartProperties(env.getServiceRoot());
         String argLine = startProps.getProperty(Strings.START_PARAMETERS);
         final String[] args = constructArgs(argLine, serviceArgs);
@@ -428,7 +445,7 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
 
     private void grantPermissions(ClassLoader cl, Permission[] perms) {
         try {
-            perms=expandUmbrella(perms);
+            perms = expandUmbrella(perms);
             Class clazz = Class.forName(VirtualFileSystemConfiguration.class.getName(), true, cl);
             securityPolicy.grant(clazz, new Principal[0], perms);
 
@@ -438,9 +455,9 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
     }
 
     private static Permission[] expandUmbrella(Permission[] perms) {
-        PermissionCollection pc=new Permissions();
-        
-        for (Permission p: perms) {
+        PermissionCollection pc = new Permissions();
+
+        for (Permission p : perms) {
             pc.add(p);
         }
         if (pc.implies(new UmbrellaGrantPermission())) {
@@ -448,14 +465,63 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
             pc.add(new GrantPermission(
                     (Permission[]) l.toArray(new Permission[l.size()])));
         }
-        List<Permission> permList=new ArrayList<Permission>();
-        
-        for (Enumeration<Permission> en=pc.elements(); en.hasMoreElements();) {
+        List<Permission> permList = new ArrayList<Permission>();
+
+        for (Enumeration<Permission> en = pc.elements(); en.hasMoreElements();) {
             permList.add(en.nextElement());
         }
         return permList.toArray(new Permission[0]);
     }
 
+    private boolean hasServiceStarterConstructor(ClassLoader cl, String className) throws ClassNotFoundException {
+        Class clazz = Class.forName(className, true, cl);
+        log.log(Level.FINE, MessageNames.CLASSLOADER_IS,
+                new Object[]{clazz.getName(), clazz.getClassLoader().toString()});
+
+        // Get this through dynamic lookup becuase it won't be in the parent
+        // classloader!
+        Class lifeCycleClass = Class.forName(Strings.LIFECYCLE_CLASS, true, cl);
+        try {
+            Constructor constructor = clazz.getDeclaredConstructor(new Class[]{String[].class, lifeCycleClass});
+            return true;
+        } catch(NoSuchMethodException nsme) {
+            return false;
+        }
+    }
+    
+    private boolean hasMain(ClassLoader cl, String className) throws ClassNotFoundException {
+        Class clazz = Class.forName(className, true, cl);
+        log.log(Level.FINE, MessageNames.CLASSLOADER_IS,
+                new Object[]{clazz.getName(), clazz.getClassLoader().toString()});
+
+        // Get this through dynamic lookup becuase it won't be in the parent
+        // classloader!
+        
+        try {
+            Method main = clazz.getMethod(Strings.MAIN, new Class[]{String[].class});
+            return true;
+        } catch(NoSuchMethodException nsme) {
+            return false;
+        }
+    }
+    
+    private void callMain(ClassLoader cl, String className, String[] args) throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        Class clazz = Class.forName(className, true, cl);
+        log.log(Level.FINE, MessageNames.CLASSLOADER_IS,
+                new Object[]{clazz.getName(), clazz.getClassLoader().toString()});
+
+        // Get this through dynamic lookup becuase it won't be in the parent
+        // classloader!
+        
+        try {
+            Method main = clazz.getMethod(Strings.MAIN, new Class[]{String[].class});
+            main.invoke(null, new Object[] {args});
+        } catch(NoSuchMethodException nsme) {
+            throw new RuntimeException(nsme);
+        }
+        
+    }
+    
     private Object instantiateService(ClassLoader cl, String className, String[] parms)
             throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, InstantiationException {
         Class clazz = Class.forName(className, true, cl);
