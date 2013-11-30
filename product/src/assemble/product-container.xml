@@ -44,6 +44,14 @@
                 <include>*:browser-module</include>
             </includes>
         </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/profile/outrigger/deploy</outputDirectory>
+            <scope>runtime</scope>
+            <includes>
+                <include>*:transient-outrigger-module</include>
+            </includes>
+        </dependencySet>
     </dependencySets>
 
 </assembly>

@@ -15,7 +15,8 @@
         <module>browser</module>
         <module>user-docs</module>
         <module>product</module>
-    </modules>
+    <module>transient-outrigger-module</module>
+  </modules>
     <properties>
         <jsk-version>2.2.2</jsk-version>
     </properties>
