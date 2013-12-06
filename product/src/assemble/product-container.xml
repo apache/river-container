@@ -33,7 +33,7 @@
             <scope>runtime</scope>
             <includes>
                 <include>*:reggie-module</include>
-                <include>*:mahalo-module</include>            
+                <include>*:transient-mahalo-module</include>            
             </includes>
         </dependencySet>
         <dependencySet>
