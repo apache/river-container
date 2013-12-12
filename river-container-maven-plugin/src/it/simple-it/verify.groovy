@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-import net.jini.jeri.BasicILFactory;
-import net.jini.jeri.BasicJeriExporter;
-import net.jini.jeri.tcp.TcpServerEndpoint;
+File touchFile = new File( basedir, "target/touch.txt" );
 
-com.sun.jini.reggie {
-	
-    initialLookupGroups = new String[] {$discoveryGroup};
-    initialMemberGroups = new String[] {$discoveryGroup};
-
-    serverExporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(0),
-                                     new BasicILFactory());
-}
+assert touchFile.isFile()
