@@ -29,10 +29,14 @@ public class ShutdownListener implements ShutdownListenerMXBean, Runnable {
     @Injected(style= InjectionStyle.BY_TYPE)
     private Context context=null;
     
+    private boolean shutdown=false;
+    
     public void run() {
         synchronized(this) {
             try {
-                wait();
+                while(!shutdown) {
+                    wait();
+                }
                 context.shutDown();
                 System.exit(0);
             } catch (InterruptedException ex) {
@@ -43,6 +47,7 @@ public class ShutdownListener implements ShutdownListenerMXBean, Runnable {
 
     public void shutdown() {
         synchronized(this) {
+            shutdown=true;
             this.notifyAll();
         }
     }

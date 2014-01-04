@@ -55,7 +55,6 @@
                             <calloutGraphicsPath>src/docbkx/resources/images/callouts/</calloutGraphicsPath>
                             <admonGraphicsPath>src/docbkx/resources/images/admons/</admonGraphicsPath>
                             <imgSrcPath>src/docbkx/resources/images/</imgSrcPath>
-                            <foCustomization>${basedir}/src/docbkx/resources/xsl/fopdf.xsl</foCustomization>
                             <draftMode>1</draftMode>
                             <postProcess>
                                 <copy todir="${basedir}/target/site">

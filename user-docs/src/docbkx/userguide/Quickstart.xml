@@ -30,15 +30,132 @@
     </chapterinfo>
     <title>Quick Start</title>
    
-    <!-- Quick Start -->	
-    <section id="quickstart">
-        <title>Apache River Container QuickStart</title>
-        <para>
-            The Apache River Container is a quick and easy way to launch services and 
-            clients that conform the the Jini Technology Specification.
-        </para>
+    <para>
+        The Apache River Container is a quick and easy way to launch services and 
+        clients that conform the the Jini Technology Specification.
+    </para>
     
+    <section>
+        <title>Building from Source</title>
+        <para>
+            If you wish to build from source, you should download the source
+            distribution, which is a multi-module maven project.
+        </para>
+        <para>
+            You'll need to have Apache Maven installed (version 3.1.1 or later).
+            Then you should be able to unpack the source distribution, and enter:
+        </para>
+        <code>
+            mvn clean install
+        </code>
+        <para>
+            In a few minutes, the build should complete successfully.  The
+            "deliverable" is in the "product" module, under product/target/product[version].
+        </para>
     </section>
+    <section>
+        <title>Using the Binary Distribution</title>
+        <para>
+            To use the binary distribution, simply unpack the archive into a 
+            convenient directory.
+                
+        </para>
+    </section>
+        
+    <section>
+        <title>Running Services in the Container</title>
+        <para>
+            By default, the container includes a few infrastructure services: 
+            the service registrar (Reggie), A JavaSpaces instance (Outrigger), 
+            and the transaction service (Mahalo).
+        </para>
+                
+        <para>
+            These services are contained in the default profile, so you can run them
+            (from the container root directory) by typing:
+        </para>
+                
+        <code>
+            sh bin/run.sh
+        </code>
+    </section>
+    <section>
+        <title>Profiles</title>
+        <para>
+            The container supports an unlimited number of 'profiles'.  Each profile is
+            a configuration of the container and may include one or more
+            applications or services.
+                
+        </para>
+                
+        <para>
+            You run a profile by using the following command line:
+        </para>
+        <code>
+            sh bin/run.sh [profile] arg*
+        </code>
+        <para>
+            If you don't specify [profile] the 'default' profile will be used.  'arg*' isn't
+            really used much in the service container profiles (like 'default'), but is made
+            available to the container.  The 'client' profile passes the arguments on to 
+            the client application that you indicate.
+        </para>
+            
+        <para>
+            Services are packaged into a jar file and placed into the 'deploy' folder
+            of the profile that you want to run.  When you run the container, all services
+            in the profile are started up.  The default profile monitors the deploy folder
+            each 5s and starts up any new services you put into the deploy folder. The 
+            'default' profile already includes a transient reggie instance and a transient 
+            mahalo instance.  You can add your own services to this folder as well.
 
-
+            Have a look at the 'reggie-module' or 'mahalo-module' target folders to see
+            what the archive should look like.  Startup parameters are in 'start.properties'.
+            'start.properties' calls out the startup class and the parameters to its constructor
+            (typically the name of the configuration file and any overrides to the config).
+        </para>
+    </section>
+        
+    <section>
+        <title>Running Client Applications</title>
+        <code>    
+            sh bin/run.sh client AppName arg*
+        </code>
+            
+        <para>
+            Starts up the container using the 'client' profile, which then starts the client
+            that is named by 'AppName' (and only that client, no matter if there are multiple
+            apps in the deploy folder).
+        </para>
+            
+        <para>
+            The container will host client applications, making the downloads available via
+            a codebase server, and setting up all the security polices that are required.
+            Client apps are packaged much like the services mentioned above.
+        </para>
+    </section>
+    <section>
+        <title>Service Browser</title>
+            
+        <para>
+            It's often useful to see what services are runnign in your workgroup, and
+            explore the interfaces and attributes that they present.  River provides a 
+            'service browser' for this purpose
+        </para>
+        <code>
+            sh bin/run.sh client browser
+        </code>
+        <para>
+            Starts up the service browser.
+        </para>
+    </section>
+        
+    <section>
+        <title>Sample Service</title>
+        <para>
+            Reggie-module and mahalo-module might be interesting samples.  For a simpler
+            'hello-world' example with a Maven build, 
+            see <link linkend="https://github.com/trasukg/river-container-examples">https://github.com/trasukg/river-container-examples.</link>
+        </para>
+    </section>
 </chapter>
