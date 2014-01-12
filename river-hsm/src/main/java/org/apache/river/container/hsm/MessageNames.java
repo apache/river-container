@@ -30,6 +30,7 @@ public class MessageNames {
             ENTRY_METHOD_ISNT_VOID = "entryMethodIsntVoid",
             ERROR_APPLYING_TRANSITION="errorApplyingTransition",
             ERROR_CREATING_PROXY="errorCreatingProxy",
+            ERROR_INCOMPATIBLE_OUTPUT="errorIncompatibleOutput",
             ERROR_INSTANTIATING="errorInstantiating",
             ERROR_INVOKING_TARGET_METHOD = "errorInvokingTargetMethod",
             EXIT_METHOD_ISNT_VOID = "exitMethodIsntVoid",

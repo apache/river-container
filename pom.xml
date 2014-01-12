@@ -16,8 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 
--->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+--><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.apache.river.container</groupId>
     <artifactId>river-container</artifactId>
@@ -37,7 +36,8 @@
         <module>product</module>
         <module>transient-outrigger-module</module>
         <module>river-container-maven-plugin</module>
-    </modules>
+    <module>river-hsm</module>
+  </modules>
     <properties>
         <jsk-version>2.2.2</jsk-version>
     </properties>

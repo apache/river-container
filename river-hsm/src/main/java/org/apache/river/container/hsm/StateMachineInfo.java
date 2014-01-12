@@ -24,5 +24,5 @@ import java.util.List;
  * @author trasukg
  */
 public interface StateMachineInfo {
-    public List<Class> getActiveStates();
+    List<Class> getActiveStates();
 }

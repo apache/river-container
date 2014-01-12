@@ -89,7 +89,11 @@
             <version>${owb.version}</version>
             <scope>compile</scope>
         </dependency>
-
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>river-hsm</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

@@ -15,26 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.river.container.hsm;
-
-import java.lang.reflect.Method;
 
 /**
  *
+ * @author trasukg
  */
-public interface StateMachineExecutor {
-    
-    /**
-     * Queue a transition to a new state, which will be executed after the 
-     * current action.
-     * @param parentState
-     * @param newState 
-     */
-    public void queueTransition(TransitionOnSubstate t);
-
-    void output(Object outputObject);
-
-    void exception(MetaState metaState, Method interfaceEvent, Throwable cause);
-
+public interface MetaStateVisitor {
+    void visit(MetaState metaState);
 }

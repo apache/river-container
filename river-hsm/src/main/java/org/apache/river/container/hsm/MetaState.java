@@ -78,7 +78,7 @@ public class MetaState {
     List<TransitionOnSubstate> entryTransitions=new ArrayList<TransitionOnSubstate>();
     
     public String toString() {
-        return stateClass==null?"Uninitialized metastate":("Meta-" + stateClass.getName());
+        return stateClass==null?"Uninitialized metastate":"Meta-" + stateClass.getName();
     }
     
     /**

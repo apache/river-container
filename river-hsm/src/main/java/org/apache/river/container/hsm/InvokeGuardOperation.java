@@ -26,7 +26,7 @@ import java.util.logging.Logger;
  * State machine operation that invokes a method on the target instance and then
  * queues a transition (or set of transitions).
  */
-public class InvokeGuardOperation implements Operation {
+class InvokeGuardOperation implements Operation {
 
     private static final Logger log =
             Logger.getLogger(InvokeGuardOperation.class.getName(), MessageNames.BUNDLE_NAME);

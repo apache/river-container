@@ -26,41 +26,44 @@ import java.util.ResourceBundle;
  * This is a runtime exception with localized error messages.
  */
 public class StateMachineException extends RuntimeException {
-    private String messageBundleName;
-    private String messageKey;
+    private final String messageBundleName;
+    private final String messageKey;
 
-    public String getMessageBundleName() {
+    String getMessageBundleName() {
         return messageBundleName;
     }
 
-    public String getMessageKey() {
+    String getMessageKey() {
         return messageKey;
     }
 
-    public Object[] getMessageParameters() {
+    Object[] getMessageParameters() {
         return messageParameters;
     }
-    private Object[] messageParameters;
+    private final Object[] messageParameters;
 
     /**
      Construct a runtime exception with a localized message.
-     @param messageBundleName
-     @param messageKey
-     @param messageParameters
+     @param messageBundleName Name of the message bundle.
+     @param messageKey Message key for this message.
+     @param messageParameters Parameters if required, null or empty if not.
      */
     public StateMachineException(String messageBundleName,
             String messageKey,
             Object[] messageParameters) {
         this.messageBundleName=messageBundleName;
         this.messageKey=messageKey;
-        this.messageParameters=messageParameters;
+        this.messageParameters=new Object[messageParameters.length];
+        System.arraycopy(messageParameters, 0, this.messageParameters, 0 , 
+                messageParameters.length);
     }
 
     /**
      Construct a runtime exception with a localized message.
-     @param messageBundleName
-     @param messageKey
-     @param messageParameters
+     @param messageBundleName Name of the message bundle.
+     @param messageKey Message key for this message.
+     @param messageParameters Parameters if required, null or empty if not.
+     @param rootCause A root cause for this exception if available.
      */
     public StateMachineException(Throwable rootCause,
             String messageBundleName,
@@ -95,7 +98,7 @@ public class StateMachineException extends RuntimeException {
      resource bundles or locales in the thrower and receiver (e.g. in the case
      of a serialized exception passed between two JVMs.
 
-     @param locale
+     @param locale The localized message
      @return
      */
     public String getMessage(Locale locale) {

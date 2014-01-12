@@ -17,7 +17,6 @@
  */
 package org.apache.river.container.hsm;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -25,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.river.container.Utils;
 
 /**
  * Compiler for state machine instances. The "input" to the compiler is actually
@@ -34,7 +32,7 @@ import org.apache.river.container.Utils;
  * @RootState annotation.
  *
  */
-public class StateMachineCompiler {
+class StateMachineCompiler {
 
     private static final Logger log =
             Logger.getLogger(StateMachineCompiler.class.getName(), MessageNames.BUNDLE_NAME);
@@ -46,11 +44,11 @@ public class StateMachineCompiler {
      * @RootState annotation.
      * @return The event interface.
      */
-    public Class[] getEventInterfaces() {
+    Class[] getEventInterfaces() {
         return eventInterfaces;
     }
 
-    public MetaState compile(Class rootStateClass) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    MetaState compile(Class rootStateClass) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         log.log(Level.FINE, MessageNames.BEGINNING_COMPILE, new Object[]{rootStateClass.getName()});
         findEventInterfaces(rootStateClass);
         // First pass: create all metastates
@@ -150,20 +148,6 @@ public class StateMachineCompiler {
 
     }
 
-    /**
-     * Have a feeling this will end up in the StateMachineRunner
-     */
-    private Object findInstance(MetaState parentMetaState, Class enclosingClass) {
-        MetaState currentState = parentMetaState;
-        while (currentState != null) {
-            if (currentState.stateClass == enclosingClass) {
-                return currentState.stateInstance;
-            }
-            currentState = currentState.parent;
-        }
-        return null;
-    }
-
     private MetaState findMetaState(MetaState[] possibleMetaStates, Class value) {
         for (MetaState metaState : possibleMetaStates) {
             if (metaState.stateClass == value) {
@@ -184,6 +168,7 @@ public class StateMachineCompiler {
                     eventMethod = metaState.stateClass.getMethod(m.getName(), m.getParameterTypes());
                 } catch (NoSuchMethodException nsme) {
                     // Silent catch - lets the event method remain null, which we check for.
+                    eventMethod=null; //Redundant but keeps PMD happy.
                 }
                 Operation operation = null;
                 if (eventMethod != null) {

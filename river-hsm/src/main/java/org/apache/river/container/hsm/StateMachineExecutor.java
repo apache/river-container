@@ -15,39 +15,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.river.container.hsm;
 
+import java.lang.reflect.Method;
+
 /**
- * Holds a transition on a substate.
+ *
  */
-public class TransitionOnSubstate {
+public interface StateMachineExecutor {
     
-    // package access, so the executor can use it directly.
-    SubstateInfo substate;
-
     /**
-     * Create an instance specifying the target metastate for the given
-     * substate.
-     * 
-     * @param substate
-     * @param targetMetaState 
+     * Queue a transition to a new state, which will be executed after the 
+     * current action.
+     * @param parentState
+     * @param newState 
      */
-    public TransitionOnSubstate(SubstateInfo substate, MetaState targetMetaState) {
-        this.substate = substate;
-        this.targetMetaState = targetMetaState;
-    }
+    void queueTransition(TransitionOnSubstate t);
 
-    public SubstateInfo getSubstate() {
-        return substate;
-    }
+    void output(Object outputObject);
 
+    void exception(MetaState metaState, Method interfaceEvent, Throwable cause);
 
-    public MetaState getTargetMetaState() {
-        return targetMetaState;
-    }
-    
-    // package access, so the executor can use it directly.
-    MetaState targetMetaState;
-    
-    
 }

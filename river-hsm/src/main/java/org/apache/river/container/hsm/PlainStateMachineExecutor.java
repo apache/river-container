@@ -213,8 +213,46 @@ public class PlainStateMachineExecutor implements StateMachineExecutor, StateMac
     }
 
     private Object buildOutputValue(Class returnType) {
+        if (returnType==null ) {
+            // No output expected.  If there is output, it isn't necessarily an
+            // error, so ignore it (i.e. don't throw an exception 
+            // if returnType== null and output!=null.
+            return null;
+        }
+        returnType=normalizeReturnType(returnType);
+        if (output!= null && ! returnType.isAssignableFrom(output.getClass())) {
+            throw new StateMachineException(MessageNames.BUNDLE_NAME, MessageNames.ERROR_INCOMPATIBLE_OUTPUT,
+                new Object[] { returnType, output.getClass() });
+        }
         return output;
     }
+    
+    /**
+     * Handle return types for primitive values.
+     * @param returnType
+     * @return 
+     */
+    private Class normalizeReturnType(Class returnType) {
+        if (returnType==int.class) {
+            return Integer.class;
+        } else if (returnType==float.class) {
+            return Float.class;
+        } else if (returnType==double.class) {
+            return Double.class;
+        } else if (returnType==long.class) {
+            return Long.class;
+        } else if (returnType==short.class) {
+            return Short.class;
+        } else if (returnType==boolean.class) {
+            return Boolean.class;
+        } else if (returnType==byte.class) {
+            return Byte.class;
+        } else if (returnType==char.class) {
+            return Character.class;
+        }
+        return returnType;
+    }
+    
     List<Throwable> exceptions = new ArrayList<Throwable>();
 
     private void clearExceptions() {
