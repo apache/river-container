@@ -28,7 +28,32 @@
     <fileSets>
         <fileSet>
             <outputDirectory>/</outputDirectory>
-            <directory>src/main/root</directory> 
+            <directory>src/main/root</directory>
+            <fileMode>0644</fileMode>
+            <excludes>
+                <exclude>bin/*</exclude>
+            </excludes>
+            <filtered>true</filtered>
+        </fileSet>
+        <fileSet>
+            <outputDirectory>/</outputDirectory>
+            <directory>src/main/root</directory>
+            <fileMode>0744</fileMode>
+            <includes>
+                <include>bin/*</include>
+            </includes>
+            <excludes>
+                <exclude>bin/logging.properties</exclude>
+            </excludes>
+            <filtered>true</filtered>
+        </fileSet>
+        <fileSet>
+            <outputDirectory>/</outputDirectory>
+            <directory>src/main/root</directory>
+            <fileMode>0644</fileMode>
+            <includes>
+                <include>bin/logging.properties</include>
+            </includes>
             <filtered>true</filtered>
         </fileSet>
     </fileSets>
@@ -45,6 +70,9 @@
                 <exclude>*:plexus-*</exclude>
             </excludes>
         </dependencySet>
+        
+        <!-- Default profile
+        -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/profile/default/deploy</outputDirectory>
@@ -62,6 +90,21 @@
                 <include>*:browser-module</include>
             </includes>
         </dependencySet>
+        
+        <!-- Client Profile
+        -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/profile/client/deploy</outputDirectory>
+            <scope>runtime</scope>
+            <includes>
+                <include>*:browser-module</include>
+                <include>*:admin-module</include>
+            </includes>
+        </dependencySet>
+        
+        <!-- Outrigger profile
+        -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/profile/outrigger/deploy</outputDirectory>

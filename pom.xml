@@ -36,8 +36,10 @@
         <module>product</module>
         <module>transient-outrigger-module</module>
         <module>river-container-maven-plugin</module>
-    <module>river-hsm</module>
-  </modules>
+        <module>river-hsm</module>
+        <module>admin-app</module>
+        <module>admin-module</module>
+    </modules>
     <properties>
         <jsk-version>2.2.2</jsk-version>
     </properties>
