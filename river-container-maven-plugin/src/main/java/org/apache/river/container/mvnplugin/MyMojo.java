@@ -1,4 +1,4 @@
-package org.apache.river.container.river.container.maven.plugin;
+package org.apache.river.container.mvnplugin;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
