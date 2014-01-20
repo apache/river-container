@@ -50,34 +50,34 @@ import org.apache.river.container.Utils;
  */
 public class ClientAppDeployer {
 
-    private static final Logger log =
-            Logger.getLogger(ClientAppDeployer.class.getName(), MessageNames.BUNDLE_NAME);
-    
-    @Injected 
-    ResourceBundle messages;
-    
-    @Injected
-    public String[] commandLineArguments=null;
+    private static final Logger log
+            = Logger.getLogger(ClientAppDeployer.class.getName(), MessageNames.BUNDLE_NAME);
 
-    @Injected(style= InjectionStyle.BY_TYPE)
-    Context context=null;
+    @Injected
+    ResourceBundle messages;
+
+    @Injected
+    public String[] commandLineArguments = null;
+
+    @Injected(style = InjectionStyle.BY_TYPE)
+    Context context = null;
 
     private String deployDirectory = org.apache.river.container.Strings.DEFAULT_DEPLOY_DIRECTORY;
-    
+
     @Injected(style = InjectionStyle.BY_TYPE)
     private FileUtility fileUtility = null;
-        
+
     @Injected(style = InjectionStyle.BY_TYPE)
     private StarterServiceDeployer deployer;
-    
+
     @Injected(style = InjectionStyle.BY_TYPE)
     private MBeanRegistrar mbeanRegistrar;
-    
+
     @Name
     private String myName = null;
 
-    private List<ApplicationEnvironment> applicationEnvironments =
-            new ArrayList<ApplicationEnvironment>();
+    private List<ApplicationEnvironment> applicationEnvironments
+            = new ArrayList<ApplicationEnvironment>();
 
     public String getDeployDirectory() {
         return deployDirectory;
@@ -87,8 +87,24 @@ public class ClientAppDeployer {
         this.deployDirectory = deployDirectory;
     }
 
-    FileObject deploymentDirectoryFile=null;
-    
+    FileObject deploymentDirectoryFile = null;
+
+    private String clientAppName = null;
+
+    public String getClientAppName() {
+        return clientAppName;
+    }
+
+    /**
+     * Set the client app that should be loaded. If not provided, client app
+     * name is taken from the first parameter.
+     *
+     * @param clientApp
+     */
+    public void setClientAppName(String clientApp) {
+        this.clientAppName = clientApp;
+    }
+
     @Init
     public void init() {
         try {
@@ -103,7 +119,7 @@ public class ClientAppDeployer {
 
     private void tryInitialize() throws IOException, ParseException {
         log.log(Level.FINE, MessageNames.STARTER_SERVICE_DEPLOYER_STARTING, myName);
-        
+
         /*
          Establish the deployment directory.
          */
@@ -117,33 +133,40 @@ public class ClientAppDeployer {
          * Find the name of the client we need to deploy.  
          */
         /* First argument was the profile name.  Second argument is the name of 
-         * the client app to run.  All the rest are paramters to the client
+         * the client app to run.  All the rest are parameters to the client
          * app.
          */
-        if (commandLineArguments.length < 2) {
+        if (clientAppName == null && commandLineArguments.length < 2) {
             System.out.println(messages.getString(MessageNames.CLIENT_APP_USAGE));
             System.exit(1);
         }
-        String clientAppName=commandLineArguments[1];
-        String[] clientAppArgs=new String[commandLineArguments.length-2];
-        System.arraycopy(commandLineArguments,2, clientAppArgs, 0,
-                clientAppArgs.length);
+        String[] clientAppArgs;
+        if (clientAppName == null) {
+            clientAppName = commandLineArguments[1];
+            clientAppArgs = new String[commandLineArguments.length - 2];
+            System.arraycopy(commandLineArguments, 2, clientAppArgs, 0,
+                    clientAppArgs.length);
+        } else {
+            clientAppArgs = new String[commandLineArguments.length - 1];
+            System.arraycopy(commandLineArguments, 1, clientAppArgs, 0,
+                    clientAppArgs.length);
+        }
         // Locate the service archive that has the client's name.
         // First get all the jar files.
-        List<FileObject> serviceArchives =
-                Utils.findChildrenWithSuffix(deploymentDirectoryFile,
-                org.apache.river.container.Strings.JAR);
+        List<FileObject> serviceArchives
+                = Utils.findChildrenWithSuffix(deploymentDirectoryFile,
+                        org.apache.river.container.Strings.JAR);
         //Then find the one that starts with the client name
-        FileObject serviceArchive=null;
-        for (FileObject fo:serviceArchives) {
-            if (fo.getName().getBaseName().startsWith(clientAppName+ org.apache.river.container.Strings.DASH)) {
-                serviceArchive=fo;
+        FileObject serviceArchive = null;
+        for (FileObject fo : serviceArchives) {
+            if (fo.getName().getBaseName().startsWith(clientAppName + org.apache.river.container.Strings.DASH)) {
+                serviceArchive = fo;
                 break;
             }
-            
+
         }
-        
-        if (serviceArchive==null) {
+
+        if (serviceArchive == null) {
             System.err.println(MessageFormat.format(messages.getString(MessageNames.NO_SUCH_CLIENT_APP), clientAppName));
             System.exit(1);
         }
@@ -157,12 +180,12 @@ public class ClientAppDeployer {
             /* Try the archive in all the deployers to see if someone can 
              * handle it. For now there's only one.
              */
-            
+
             /*
              * Create the ApplicationEnvironment for the archive.
              */
-            ServiceLifeCycle deployedApp=deployer.deployServiceArchive(archiveFile);
-            
+            ServiceLifeCycle deployedApp = deployer.deployServiceArchive(archiveFile);
+
             deployedApp.startWithArgs(commandLineArgs);
         } catch (Throwable t) {
             log.log(Level.WARNING, MessageNames.FAILED_DEPLOY_SERVICE, archiveFile.toString());

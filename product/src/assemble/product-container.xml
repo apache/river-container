@@ -99,6 +99,16 @@
             <scope>runtime</scope>
             <includes>
                 <include>*:browser-module</include>
+            </includes>
+        </dependencySet>
+        
+        <!-- Admin-client Profile
+        -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/profile/admin-client/deploy</outputDirectory>
+            <scope>runtime</scope>
+            <includes>
                 <include>*:admin-module</include>
             </includes>
         </dependencySet>

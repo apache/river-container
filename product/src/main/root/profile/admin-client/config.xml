@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : config.xml
+    Created on : December 10, 2010, 6:39 PM
+    Author     : trasukg
+    Description:
+        Configuration file in the 'profile' directory selected by the 
+        command line.
+-->
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+ -->
+
+<cfg:container-config  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+   xmlns:cfg='http://river.apache.org/xml/ns/container/config/1.0'
+   xsi:schemaLocation='http://river.apache.org/xml/ns/container/config/1.0 file:/home/trasukg/development/surrogate/src/schemas/config.xsd'>
+    <cfg:property name="deploymentDirectory" value="deploy"/>
+
+    <cfg:property name="defaultDiscoveryGroup" value="RiverContainerDefault"/>
+    <cfg:component class="org.apache.river.container.work.ContextualWorkManager"/>
+    <cfg:component class="org.apache.river.container.work.BasicWorkManager"/>
+    <cfg:component class="org.apache.river.container.codebase.ClassServer"/>
+
+    <!-- Deployer for 'service-starter'-style applications. -->
+    <cfg:component class="org.apache.river.container.deployer.StarterServiceDeployer">
+        <cfg:property name="config" value="client-app.cfg"/>
+    </cfg:component>
+    
+    <!-- Deployer for 'service-starter'-style applications. 
+    This is the 'admin-app' profile, so set the clientAppName to 'admin'
+    -->
+    <cfg:component class="org.apache.river.container.deployer.ClientAppDeployer">
+        <cfg:property name="deployDirectory" value="deploy"/>
+        <cfg:property name="clientAppName" value="admin"/>
+    </cfg:component>
+    
+
+    <!--
+    <cfg:component class="org.apache.river.container.ShowContextToConsole"/>
+    -->
+</cfg:container-config>
