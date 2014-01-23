@@ -20,6 +20,7 @@ package org.apache.river.container.deployer;
 import java.util.List;
 import java.util.logging.Logger;
 import java.io.InputStream;
+import java.util.logging.Level;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -60,11 +61,13 @@ public class DeployerConfigParserTest {
      it through the parser without errors.
      */
     public void testBasicParsing() throws ParseException {
+        log.setLevel(Level.FINE);
         ASTconfig config = parseTestConfig();
         log.fine("grants string is:" + config.toString());
         String expected = "config (grant (permission java.io.FilePermission \"${serviceArchive}\" \"read\") "
                 + "(permission java.net.SocketPermission \"*\" \"connect\")) "
                 + "(classloader (parent systemClassLoader) "
+                + "appPriority "
                 + "(jars (classpath (cpEntry commons-vfs-1.0.jar) "
                 + "(cpEntry commons-logging-1.1.1.jar) (cpEntry jsk-platform.jar) "
                 + "(cpEntry jsk-lib.jar) (cpEntry jsk-resources.jar) "

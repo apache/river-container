@@ -49,6 +49,22 @@
         <cfg:property name="autoDeploy" value="true"/>
     </cfg:component>
     
+    <!-- Deployer for privileged 'service-starter'-style applications. 
+        i.e. the Admin service.
+    -->
+    <cfg:component class="org.apache.river.container.deployer.StarterServiceDeployer"
+        name="privileged-deployer">
+        <cfg:property name="config" value="privileged-service-starter.cfg"/>
+    </cfg:component>
+    
+    <!-- Deployer for applications that are in the 'deploy' directory
+    at startup. -->
+    <cfg:component class="org.apache.river.container.deployer.StartupDeployer">
+        <cfg:property name="deployDirectory" value="deploy-privileged"/>
+        <cfg:property name="autoDeploy" value="true"/>
+        <cfg:property name="deployerName" value="privileged-deployer"/>
+    </cfg:component>
+    
     <!-- Deployer for 'system apps' like the remote deployment service 
     <cfg:component class="org.apache.river.container.deployer.StarterServiceDeployer">
         <cfg:property name="config" value="privileged-services.cfg"/>

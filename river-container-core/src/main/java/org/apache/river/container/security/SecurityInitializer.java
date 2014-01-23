@@ -18,8 +18,10 @@
 package org.apache.river.container.security;
 
 import java.security.Policy;
+import java.security.PrivilegedAction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.jini.security.Security;
 import net.jini.security.policy.DynamicPolicyProvider;
 import org.apache.river.container.ConfigurationException;
 import org.apache.river.container.Context;
@@ -27,40 +29,52 @@ import org.apache.river.container.Init;
 import org.apache.river.container.Injected;
 import org.apache.river.container.InjectionStyle;
 import org.apache.river.container.MessageNames;
+import org.apache.river.container.Utils;
 
 /**
- This class is the container component that sets up the security manager and
- dynamic policy provider.
-
- @author trasukg
+ * This class is the container component that sets up the security manager and
+ * dynamic policy provider.
+ *
+ * @author trasukg
  */
 public class SecurityInitializer {
 
-    private static Logger log =
-            Logger.getLogger(SecurityInitializer.class.getName(),
-            MessageNames.BUNDLE_NAME);
+    private static Logger log
+            = Logger.getLogger(SecurityInitializer.class.getName(),
+                    MessageNames.BUNDLE_NAME);
     @Injected(style = InjectionStyle.BY_TYPE)
     private Context context;
 
     @Injected
+    private ClassLoader containerClassLoader;
+
+    @Injected 
     private ClassLoader bootstrapClassLoader;
     
     @Init
     public void initialize() {
-        Policy basePolicy = new ContainerCodePolicy(bootstrapClassLoader);
-        DynamicPolicyProvider policy = new DynamicPolicyProvider(basePolicy);
-        Policy.setPolicy(policy);
-        
-        context.put(org.apache.river.container.Strings.SECURITY_POLICY, policy);
-        
-        System.setSecurityManager(new SecurityManager());
-        
-        Policy installedPolicy = Policy.getPolicy();
-        if (installedPolicy != policy) {
-            throw new ConfigurationException(MessageNames.SECURITY_INIT_WRONG_POLICY,
-                    installedPolicy);
-        }
-        
+        Security.doPrivileged(new PrivilegedAction() {
+
+            public Object run() {
+                log.info("Container classloader is...");
+                Utils.logClassLoaderHierarchy(log, Level.INFO, containerClassLoader);
+                Policy basePolicy = new ContainerCodePolicy(containerClassLoader, bootstrapClassLoader);
+                DynamicPolicyProvider policy = new DynamicPolicyProvider(basePolicy);
+                Policy.setPolicy(policy);
+
+                context.put(org.apache.river.container.Strings.SECURITY_POLICY, policy);
+
+                System.setSecurityManager(new SecurityManager());
+
+                Policy installedPolicy = Policy.getPolicy();
+                if (installedPolicy != policy) {
+                    throw new ConfigurationException(MessageNames.SECURITY_INIT_WRONG_POLICY,
+                            installedPolicy);
+                }
+                return null;
+            }
+        });
+
         log.log(Level.INFO, MessageNames.SECURITY_INIT_SUCCEEDED);
 
     }

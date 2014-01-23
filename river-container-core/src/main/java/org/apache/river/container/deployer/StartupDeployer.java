@@ -113,6 +113,16 @@ public class StartupDeployer {
 
     FileObject deploymentDirectoryFile = null;
 
+    private String deployerName=null;
+
+    public String getDeployerName() {
+        return deployerName;
+    }
+
+    public void setDeployerName(String deployerName) {
+        this.deployerName = deployerName;
+    }
+    
     @Init
     public void init() {
         try {
@@ -127,6 +137,12 @@ public class StartupDeployer {
 
     private void tryInitialize() throws IOException, ParseException {
         log.log(Level.FINE, MessageNames.STARTER_SERVICE_DEPLOYER_STARTING, myName);
+        /*
+        If the deployerName is supplied, look it up and override the injected deployer.
+        */
+        if(deployerName != null) {
+            deployer=(StarterServiceDeployer) context.get(deployerName);
+        }
         /*
          Establish the deployment directory.
          */

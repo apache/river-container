@@ -19,6 +19,10 @@ package org.apache.river.container;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.security.AccessController;
+import java.security.Permission;
+import java.security.Policy;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,13 +30,14 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.jini.security.policy.DynamicPolicyProvider;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileType;
 
 /**
-
- @author trasukg
+ *
+ * @author trasukg
  */
 public class Utils {
 
@@ -107,12 +112,17 @@ public class Utils {
             Class cls) {
         log.log(level, MessageNames.CLASSLOADER_IS,
                 new Object[]{cls.getName(), cls.getClassLoader()});
-        ClassLoader parent = cls.getClassLoader().getParent();
-        while (parent != null) {
-            log.log(level, MessageNames.PARENT_CLASS_LOADER_IS,
-                    new Object[]{parent});
-            parent = parent.getParent();
+        try {
+            ClassLoader parent = cls.getClassLoader().getParent();
+            while (parent != null) {
+                log.log(level, MessageNames.PARENT_CLASS_LOADER_IS,
+                        new Object[]{parent});
+                parent = parent.getParent();
+            }
+        } catch (Throwable t) {
+            log.log(level, Strings.NEWLINE);
         }
+
     }
 
     public static void logClassLoaderHierarchy(Logger log,
@@ -124,14 +134,31 @@ public class Utils {
         while (parent != null) {
             log.log(level, MessageNames.PARENT_CLASS_LOADER_IS,
                     new Object[]{parent});
-            parent = parent.getParent();
+            try {
+                parent = parent.getParent();
+            } catch (Throwable t) {
+                parent = null;
+            }
         }
     }
-    
+
     public static String stackTrace(Throwable t) {
-        StringWriter s=new StringWriter();
-        PrintWriter pw=new PrintWriter(s);
+        StringWriter s = new StringWriter();
+        PrintWriter pw = new PrintWriter(s);
         t.printStackTrace(pw);
         return s.toString();
+    }
+
+    public static void logGrantsToClass(final Logger log, final Level level, final Class c) {
+        AccessController.doPrivileged(new PrivilegedAction<Object>() {
+            public Object run() {
+                ClassLoader cl = c.getClassLoader();
+                DynamicPolicyProvider dpp = (DynamicPolicyProvider) Policy.getPolicy();
+                Permission[] perms = dpp.getGrants(c, null);
+                log.log(level, MessageNames.GRANTS_TO_CLASS_ARE,
+                        new Object[]{c.getName(), Utils.format(perms)});
+                return null;
+            }
+        });
     }
 }

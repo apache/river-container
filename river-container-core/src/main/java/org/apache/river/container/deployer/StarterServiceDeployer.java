@@ -137,17 +137,23 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
         String parentLoaderName = configNode.search(
                 new Class[]{ASTconfig.class, ASTclassloader.class, ASTparent.class}).get(0).jjtGetChild(0).toString();
         log.log(Level.FINE, MessageNames.SERVICE_PARENT_CLASSLOADER_IS, parentLoaderName);
+        boolean isAppPriority=false;
+        if (!configNode.search( new Class[]{ ASTconfig.class, ASTclassloader.class, ASTappPriority.class}).isEmpty()) {
+            isAppPriority=true;
+        }
         ClassLoader parentLoader = (ClassLoader) context.get(parentLoaderName);
         VirtualFileSystemClassLoader cl
-                = createChildOfGivenClassloader(parentLoader, codeSource);
+                = createChildOfGivenClassloader(parentLoader, codeSource, isAppPriority);
         /*
          Include platform jars from the container's lib directory.
          */
-        ASTclasspath platformJarSpec = (ASTclasspath) configNode.search(new Class[]{ASTconfig.class,
-            ASTclassloader.class, ASTjars.class, ASTclasspath.class}).get(0);
-        addPlatformJarsToClassloader(platformJarSpec, cl);
+        List classpathNodes = configNode.search(new Class[]{ASTconfig.class,
+            ASTclassloader.class, ASTjars.class, ASTclasspath.class});
+        if (classpathNodes.size() > 0) {
+            ASTclasspath platformJarSpec = (ASTclasspath) classpathNodes.get(0);
+            addPlatformJarsToClassloader(platformJarSpec, cl);
+        }
         addLibDirectoryJarsToClasspath(serviceRoot, cl);
-
         return cl;
 
     }
@@ -171,12 +177,12 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
         cl.addClasspathFilters(filters, fileUtility.getLibDirectory());
     }
 
-    protected VirtualFileSystemClassLoader createChildOfGivenClassloader(ClassLoader parent, CodeSource codeSource) {
+    protected VirtualFileSystemClassLoader createChildOfGivenClassloader(ClassLoader parent, CodeSource codeSource, boolean isAppPriority) {
         /*
          Create the service classloader.
          */
         VirtualFileSystemClassLoader cl
-                = new VirtualFileSystemClassLoader(null, parent, codeSource);
+                = new VirtualFileSystemClassLoader(null, parent, codeSource, isAppPriority);
         return cl;
     }
 
@@ -215,7 +221,7 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
         log.log(Level.FINE, MessageNames.CALLING_MAIN, new Object[]{
             startClassName, Utils.format(args)
         });
-        Runnable task=null;
+        Runnable task = null;
         if (hasServiceStarterConstructor(env.getClassLoader(), startClassName)) {
             task = new Runnable() {
                 @Override
@@ -238,7 +244,7 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
                     }
                 }
             };
-            
+
         } else {
             throw new UnsupportedOperationException();
         }
@@ -484,11 +490,11 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
         try {
             Constructor constructor = clazz.getDeclaredConstructor(new Class[]{String[].class, lifeCycleClass});
             return true;
-        } catch(NoSuchMethodException nsme) {
+        } catch (NoSuchMethodException nsme) {
             return false;
         }
     }
-    
+
     private boolean hasMain(ClassLoader cl, String className) throws ClassNotFoundException {
         Class clazz = Class.forName(className, true, cl);
         log.log(Level.FINE, MessageNames.CLASSLOADER_IS,
@@ -496,15 +502,14 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
 
         // Get this through dynamic lookup becuase it won't be in the parent
         // classloader!
-        
         try {
             Method main = clazz.getMethod(Strings.MAIN, new Class[]{String[].class});
             return true;
-        } catch(NoSuchMethodException nsme) {
+        } catch (NoSuchMethodException nsme) {
             return false;
         }
     }
-    
+
     private void callMain(ClassLoader cl, String className, String[] args) throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         Class clazz = Class.forName(className, true, cl);
         log.log(Level.FINE, MessageNames.CLASSLOADER_IS,
@@ -512,16 +517,15 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
 
         // Get this through dynamic lookup becuase it won't be in the parent
         // classloader!
-        
         try {
             Method main = clazz.getMethod(Strings.MAIN, new Class[]{String[].class});
-            main.invoke(null, new Object[] {args});
-        } catch(NoSuchMethodException nsme) {
+            main.invoke(null, new Object[]{args});
+        } catch (NoSuchMethodException nsme) {
             throw new RuntimeException(nsme);
         }
-        
+
     }
-    
+
     private Object instantiateService(ClassLoader cl, String className, String[] parms)
             throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, InstantiationException {
         Class clazz = Class.forName(className, true, cl);

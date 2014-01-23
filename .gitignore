@@ -6,3 +6,8 @@
 *.war
 *.ear
 /target/
+/admin-svc-api/nbproject/private/
+/admin-svc/admin-svc-api/target/
+/admin-svc/admin-svc-module/target/
+/admin-svc/admin-svc-impl/target/
+/admin-svc/admin-svc-dl/target/

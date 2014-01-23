@@ -73,6 +73,7 @@
         
         <!-- Default profile
         -->
+        
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/profile/default/deploy</outputDirectory>
@@ -84,13 +85,13 @@
         </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/profile/client/deploy</outputDirectory>
+            <outputDirectory>/profile/default/deploy-privileged</outputDirectory>
             <scope>runtime</scope>
             <includes>
-                <include>*:browser-module</include>
+                <include>*:admin-svc-module</include>
             </includes>
         </dependencySet>
-        
+
         <!-- Client Profile
         -->
         <dependencySet>

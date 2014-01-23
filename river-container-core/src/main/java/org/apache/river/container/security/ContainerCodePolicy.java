@@ -35,17 +35,18 @@ import org.apache.river.container.MessageNames;
  */
 public class ContainerCodePolicy extends Policy {
 
-    private static final Logger log =
-            Logger.getLogger(ContainerCodePolicy.class.getName(),
-            MessageNames.BUNDLE_NAME);
+    private static final Logger log
+            = Logger.getLogger(ContainerCodePolicy.class.getName(),
+                    MessageNames.BUNDLE_NAME);
     List<ClassLoader> privilegedClassLoaders = new ArrayList<ClassLoader>();
 
-    public ContainerCodePolicy(ClassLoader bootstrapClassLoader) {
-        privilegedClassLoaders.add(bootstrapClassLoader);
-        ClassLoader cl = this.getClass().getClassLoader();
-        while (cl != null) {
-            privilegedClassLoaders.add(cl);
-            cl = cl.getParent();
+    public ContainerCodePolicy(ClassLoader... classLoaders) {
+
+        for (ClassLoader cl : classLoaders) {
+            while (cl != null) {
+                privilegedClassLoaders.add(cl);
+                cl = cl.getParent();
+            }
         }
         allPermissions.add(new AllPermission());
         allPermissions.setReadOnly();
@@ -67,12 +68,13 @@ public class ContainerCodePolicy extends Policy {
 
     /**
      * This seems to be necessary to allow the com.sun.rmi.server.LoaderHandler
-     * class to read the marshalled object.  LoaderHandler will call 
-     * this method to get the permissions that are granted to all classes, which
-     * in the case of the container, is none.  But the permissions collection
-     * must be writable.
+     * class to read the marshalled object. LoaderHandler will call this method
+     * to get the permissions that are granted to all classes, which in the case
+     * of the container, is none. But the permissions collection must be
+     * writable.
+     *
      * @param codesource
-     * @return 
+     * @return
      */
     @Override
     public PermissionCollection getPermissions(CodeSource codesource) {

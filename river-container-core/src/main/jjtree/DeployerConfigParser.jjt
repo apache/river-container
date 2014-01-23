@@ -99,11 +99,13 @@ TOKEN :
 |       < CONFIGURATION: "configuration">
 |       < JARS: "jars">
 |       < PARENT: "parent">
+|       < APPLICATION: "application">
 | 	< AND: "and" >
 | 	< OR: "or" >
 | 	< NOT: "not" >
 | 	< TRUE: "true" >
 | 	< FALSE: "false" >
+|       < PRIORITY: "priority" >
 |  	< SYMBOL:
 		["A"-"Z", "a"-"z", "_"] 
                     (["0"-"9", "A"-"Z", "a"-"z", ".", "_", "-", "$"])*>
@@ -184,7 +186,31 @@ void classloader() #classloader:
     log.fine("classloader()");
 }
 {
-    <CLASSLOADER> <LBRACE> parent() [jars()] [codebase()] <RBRACE>
+    <CLASSLOADER> <LBRACE> parent() [loaderPriority()] [jars()] [codebase()] <RBRACE>
+}
+
+void loaderPriority():
+{
+    log.fine("loaderPriority");
+}
+{
+    <PRIORITY> (appPriority() | parentPriority()) <SEMICOLON>
+}
+
+void appPriority() #appPriority:
+{
+    log.fine("appPriority");
+}
+{
+    <APPLICATION>
+}
+
+void parentPriority() #parentPriority:
+{
+    log.fine("parentPriority()");
+}
+{   
+    <PARENT>
 }
 
 void jars() #jars:
@@ -192,7 +218,7 @@ void jars() #jars:
     log.fine("jars()");
 }
 {
-    <JARS> <LBRACE> classpath() <RBRACE>
+    <JARS> <LBRACE> [classpath()] <RBRACE>
 }
 
 void parent() #parent:

@@ -85,6 +85,7 @@ public class MessageNames {
             FAILED_TO_SET_PROPERTY="failedToSetProperty",
             FOUND_NO_SERVICE_ARCHIVES="foundNoServiceArchives",
             FOUND_SERVICE_ARCHIVES="foundServiceArchives",
+            GRANTS_TO_CLASS_ARE="grantsToClassAre",
             ILLEGAL_ARGUMENT_EXCEPTION="illegalArgumentException",
             ILLEGAL_ACCESS_EXCEPTION="illegalAccessException",
             INITIALIZATION_EXCEPTION="initializationException",

@@ -55,6 +55,7 @@ public class Strings {
             MAIN="main",
             MESSAGES="messages",
             NAME="name",
+            NEWLINE="\n",
             PLATFORM_JARS="platformJars",
             PLATFORM_CODEBASE="platformCodebase",
             PROFILE = "profile",
