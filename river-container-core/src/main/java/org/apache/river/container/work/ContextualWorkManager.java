@@ -19,6 +19,7 @@ package org.apache.river.container.work;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 import org.apache.river.container.Strings;
 
 /**
@@ -29,44 +30,46 @@ public class ContextualWorkManager {
 
     List<Context> contexts=new ArrayList<Context>();
     
-    public WorkingContext createContext(String name) {
-        Context context=new Context(name);
+    public WorkingContext createContext(String name, ClassLoader contextLoader) {
+        Context context=new Context(name, contextLoader);
         contexts.add(context);
         return context;
     }
     
     private class Context implements WorkingContext {
         String name=Strings.UNNAMED;
-
+        ClassLoader contextLoader;
+        
         public String getName() {
             return name;
         }
 
-        public Context(String name) {
+        public Context(String name, ClassLoader contextLoader) {
             this.name=name;
-            workManager=new BasicWorkManager(name);
+            this.contextLoader=contextLoader;
+            executor=new BasicExecutor(contextLoader, name);
         }
         
-        BasicWorkManager workManager=null;
+        BasicExecutor executor=null;
         
         @Override
-        public WorkManager getWorkManager() {
-            return workManager;
+        public ScheduledExecutorService getScheduledExecutorService() {
+            return executor;
         }
 
         @Override
         public int getActiveThreadCount() {
-            return workManager.getActiveCount();
+            return executor.getActiveCount();
         }
 
         @Override
         public void shutdown() {
-            workManager.shutdown();
+            executor.shutdownNow();
         }
 
         @Override
         public void interrupt() {
-            workManager.interrupt();
+            executor.shutdownNow();
         }
         
     }

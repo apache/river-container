@@ -58,6 +58,9 @@ classes.
 - [State Machine](StateMachine.html) Information on the annotation-based state
 machine implementation used in various places in the container.
 - [Surrogate Deployment](SurrogateDeployment.html) Deployer used to host 
-Jini Surrogates.
+Jini Surrogates.  
+- [Work Manager Considerations](WorkManager.html) Design thoughts on work/thread
+management in the
+container.
 - [To Do](Todo.html) To-do list for the development.
 

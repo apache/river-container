@@ -137,9 +137,9 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
         String parentLoaderName = configNode.search(
                 new Class[]{ASTconfig.class, ASTclassloader.class, ASTparent.class}).get(0).jjtGetChild(0).toString();
         log.log(Level.FINE, MessageNames.SERVICE_PARENT_CLASSLOADER_IS, parentLoaderName);
-        boolean isAppPriority=false;
-        if (!configNode.search( new Class[]{ ASTconfig.class, ASTclassloader.class, ASTappPriority.class}).isEmpty()) {
-            isAppPriority=true;
+        boolean isAppPriority = false;
+        if (!configNode.search(new Class[]{ASTconfig.class, ASTclassloader.class, ASTappPriority.class}).isEmpty()) {
+            isAppPriority = true;
         }
         ClassLoader parentLoader = (ClassLoader) context.get(parentLoaderName);
         VirtualFileSystemClassLoader cl
@@ -248,7 +248,7 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
         } else {
             throw new UnsupportedOperationException();
         }
-        env.getWorkingContext().getWorkManager().queueTask(env.getClassLoader(), task);
+        env.getWorkingContext().getScheduledExecutorService().submit(task);
     }
 
     public Properties readStartProperties(FileObject serviceRoot) throws FileSystemException, LocalizedRuntimeException, IOException {
@@ -267,26 +267,29 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
         return startProps;
     }
 
-    public void setupLiaisonConfiguration(FileObject serviceArchive, FileObject serviceRoot, VirtualFileSystemClassLoader cl) throws ConfigurationException {
+    public void setupLiaisonConfiguration(ApplicationEnvironment env) throws ConfigurationException {
         /*
          Setup the liaison configuration.
          */
         ClassLoader originalContextCl = Thread.currentThread().getContextClassLoader();
         try {
-            Thread.currentThread().setContextClassLoader(cl);
+            Thread.currentThread().setContextClassLoader(env.getClassLoader());
             File workingDir = null;
-            if (serviceArchive != null) {
-                workingDir = new File(serviceArchive.getURL().toURI());
+            if (env.getServiceArchive() != null) {
+                /* TODO: Is this right?  Shouldn't the working directory be created
+                by the file manager under the 'work' dir?
+                */
+                workingDir = new File(env.getServiceArchive().getURL().toURI());
             } else {
-                workingDir = new File(serviceRoot.getURL().toURI());
+                workingDir = new File(env.getServiceArchive().getURL().toURI());
 
             }
 
-            grantPermissions(cl,
+            grantPermissions(env.getClassLoader(),
                     new Permission[]{new FilePermission(workingDir.getAbsolutePath(), Strings.READ)});
             Utils.logClassLoaderHierarchy(log, Level.FINE, this.getClass());
             String configName = VirtualFileSystemConfiguration.class.getName();
-            invokeStatic(cl, configName,
+            invokeStatic(env.getClassLoader(), configName,
                     Strings.SET_WORKING_DIRECTORY,
                     workingDir);
             /*
@@ -299,7 +302,7 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
                 String contextVarName = cfgEntryNode.jjtGetChild(1).toString();
                 Object contextValue = context.get(contextVarName);
                 if (contextValue != null) {
-                    invokeStatic(cl, configName,
+                    invokeStatic(env.getClassLoader(), configName,
                             Strings.PUT_SPECIAL_ENTRY,
                             new Class[]{String.class, Object.class},
                             Strings.DOLLAR + varName, contextValue);
@@ -308,6 +311,14 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
                             new Object[]{getConfig(), varName, contextVarName});
                 }
             }
+            /* Install the Executor. */
+            invokeStatic(env.getClassLoader(), configName,
+                    Strings.PUT_SPECIAL_ENTRY,
+                    new Class[]{String.class, Object.class
+                    },
+                    Strings.DOLLAR + Strings.EXECUTOR_NAME, env.getWorkingContext().getScheduledExecutorService()
+            );
+
         } catch (Exception ex) {
             log.log(Level.WARNING, MessageNames.EXCEPTION_THROWN, Utils.stackTrace(ex));
             throw new ConfigurationException(ex,
@@ -385,12 +396,13 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
          */
         Permission[] perms = createPermissionsInClassloader(cl);
         grantPermissions(cl, perms);
-        setupLiaisonConfiguration(env.getServiceArchive(), env.getServiceRoot(), cl);
-
+        
         /*
          * Create a working context (work manager).
          */
-        env.setWorkingContext(contextualWorkManager.createContext(env.getServiceName()));
+        env.setWorkingContext(contextualWorkManager.createContext(env.getServiceName(), env.getClassLoader()));
+ 
+        setupLiaisonConfiguration(env);
     }
 
     void launchService(ApplicationEnvironment env, String[] serviceArgs) throws FileSystemException, IOException, ClassNotFoundException {

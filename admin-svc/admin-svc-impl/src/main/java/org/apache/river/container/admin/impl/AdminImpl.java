@@ -20,9 +20,8 @@ package org.apache.river.container.admin.impl;
 import com.sun.jini.config.Config;
 import com.sun.jini.start.LifeCycle;
 import java.io.IOException;
-import java.net.SocketPermission;
 import java.rmi.server.ExportException;
-import java.security.AccessController;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.jini.config.Configuration;
@@ -60,16 +59,13 @@ public class AdminImpl implements ServiceIDListener, AdminRemote {
     JoinManager joinManager = null;
     DiscoveryManagement discoveryManager = null;
     Entry[] attributes = null;
-
+    ScheduledExecutorService executor=null;
+    
     public AdminImpl(String args[], final LifeCycle lc) throws ConfigurationException, ExportException, IOException {
 
         config = ConfigurationProvider.getInstance(args);
         // Get the exporter and create our proxy.
         exporter = (Exporter) Config.getNonNullEntry(config, COMPONENT_ID, "exporter", Exporter.class);
-        log.fine("\n");
-        org.apache.river.container.Utils.logClassLoaderHierarchy(log, this.getClass());
-        org.apache.river.container.Utils.logClassLoaderHierarchy(log, config.getClass());
-        log.fine("\n");
         Utils.logGrantsToClass(log, Level.FINE, this.getClass());
         try {
             myProxy = (Admin) exporter.export(this);
@@ -83,6 +79,15 @@ public class AdminImpl implements ServiceIDListener, AdminRemote {
         // We don't have to do anything with it - just creating it starts the join process.
         joinManager = new JoinManager(myProxy, attributes, this, discoveryManager, null, config);
         log.info("Started the admin service");
+        
+        /* For local clients, we don't want to be dependent on the Jini infrastructure being setup
+        correctly.  For this reason, we stash a copy of the proxy's MarshalledObject in the local 
+        file system.
+        */
+        synchronized(this) {
+            executor=(ScheduledExecutorService) Config.getNonNullEntry(config, COMPONENT_ID, "$executor", ScheduledExecutorService.class);
+        }
+        
     }
 
     ServiceID sid = null;

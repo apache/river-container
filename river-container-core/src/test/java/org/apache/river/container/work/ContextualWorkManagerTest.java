@@ -32,30 +32,30 @@ import org.junit.Test;
 public class ContextualWorkManagerTest {
 
     ContextualWorkManager UUT = new ContextualWorkManager();
-    WorkingContext context = UUT.createContext("Test-ctx");
+    WorkingContext context = UUT.createContext("Test-ctx", Thread.currentThread().getContextClassLoader());
 
     @Test
     public void testContextCreation() {
         assertNotNull("context", context);
-        assertNotNull("context.workManager", context.getWorkManager());
+        assertNotNull("context.scheduledExecutorService", context.getScheduledExecutorService());
     }
 
     @Test
-    public void testThreadCount() {
+    public void testRunAndExit() {
         WorkerRunnable wt = new WorkerRunnable();
-        context.getWorkManager().queueTask(null, wt);
+        context.getScheduledExecutorService().submit(wt);
         long start = System.currentTimeMillis();
         while (System.currentTimeMillis() - start < 2000 & context.getActiveThreadCount() < 1) {
             Thread.yield();
         }
         assertEquals("thread count", 1, context.getActiveThreadCount());
-        wt.proceed = true;
+        
     }
 
     @Test
     public void testChildThreadGroup() throws Exception {
         WorkerRunnable wt = new WorkerRunnable();
-        context.getWorkManager().queueTask(null, wt);
+        context.getScheduledExecutorService().submit(wt);
         long start = System.currentTimeMillis();
         while (System.currentTimeMillis() - start < 2000 & context.getActiveThreadCount() < 1) {
             Thread.yield();
@@ -71,7 +71,7 @@ public class ContextualWorkManagerTest {
     @Test
     public void testThreadCountWithChildren() throws Exception {
         WorkerRunnable wt = new WorkerRunnable(2);
-        context.getWorkManager().queueTask(null, wt);
+        context.getScheduledExecutorService().submit(wt);
         long start = System.currentTimeMillis();
         while (System.currentTimeMillis() - start < 2000 & context.getActiveThreadCount() < 1) {
             Thread.yield();
@@ -91,7 +91,7 @@ public class ContextualWorkManagerTest {
         String threadGroupName = Strings.UNKNOWN;
         List<WorkerRunnable> children = new ArrayList<WorkerRunnable>();
         String id = "--";
-        boolean proceed = false;
+        volatile boolean proceed = false;
         int nChildren = 0;
 
         public WorkerRunnable() {

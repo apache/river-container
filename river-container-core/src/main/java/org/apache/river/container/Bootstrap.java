@@ -173,6 +173,10 @@ public class Bootstrap {
         Method initCompleteMethod = context.getClass().getMethod(Strings.INIT_COMPLETE, new Class[0]);
         Thread.currentThread().setContextClassLoader(containerClassLoader);
         putByNameMethod.invoke(context, Strings.CLASS_LOADERS, (Object) classLoaders);
+        
+        /* Store a link to the context in the context. */
+        putByNameMethod.invoke(context, Strings.CONTEXT, context);
+        
         /*
          Process the core configuration
          */

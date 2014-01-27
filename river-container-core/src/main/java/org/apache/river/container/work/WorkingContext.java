@@ -17,6 +17,8 @@
  */
 package org.apache.river.container.work;
 
+import java.util.concurrent.ScheduledExecutorService;
+
 /**
 
  @author trasukg
@@ -27,7 +29,7 @@ public interface WorkingContext {
     context.
     @return The WorkManager instance.
     */
-    WorkManager getWorkManager();
+    ScheduledExecutorService getScheduledExecutorService();
     
     /**
     Answer how many threads are currently active in this context.
