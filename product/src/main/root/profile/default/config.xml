@@ -32,7 +32,12 @@
    xsi:schemaLocation='http://river.apache.org/xml/ns/container/config/1.0 file:/home/trasukg/development/surrogate/src/schemas/config.xsd'>
     <cfg:property name="deploymentDirectory" value="deploy"/>
 
+    <!-- Change this value to change the discovery group for the container.
+    In the default 'service-starter.cfg', this  value is made available inside 
+    service starter configuration files as '$discoveryGroup'.
+    -->
     <cfg:property name="defaultDiscoveryGroup" value="RiverContainerDefault"/>
+    
     <cfg:component class="org.apache.river.container.work.ContextualWorkManager"/>
     <cfg:component class="org.apache.river.container.work.BasicWorkManager"/>
     <cfg:component class="org.apache.river.container.codebase.ClassServer"/>
