@@ -55,6 +55,7 @@
         lib/jsk-resources-${jsk-version}.jar
         lib/regexp-1.3.jar
         lib/river-hsm-${project.version}.jar
+        lib/admin-svc-api-${project.version}.jar
     </cfg:classpath>
 
     <!--cfg:component class="org.apache.river.container.ShowContextToConsole"/-->

@@ -78,6 +78,7 @@ public class MessageNames {
             DUPLICATE_CLASSPATH="duplicateClasspath",
             EXCEPTION_THROWN="exceptionThrown",
             EXCEPTION_WHILE_STOPPING="exceptionWhileStopping",
+            EXECUTOR_NAME_IS="executorNameIs",
             FAILED_CLEAN_SHUTDOWN="failedCleanShutdown",
             FAILED_DEPLOY_SERVICE="failedDeployService",
             FAILED_READ_PROPERTIES="failedReadProperties",

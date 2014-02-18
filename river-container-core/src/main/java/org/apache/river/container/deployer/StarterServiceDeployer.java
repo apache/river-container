@@ -73,7 +73,7 @@ import org.apache.river.container.work.WorkManager;
  * Deployer that instantiates applications or services based on the
  * com.sun.jini.starter API
  */
-public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
+public class StarterServiceDeployer  {
 
     private static final Logger log
             = Logger.getLogger(StarterServiceDeployer.class.getName(), MessageNames.BUNDLE_NAME);
@@ -276,13 +276,18 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
             Thread.currentThread().setContextClassLoader(env.getClassLoader());
             File workingDir = null;
             if (env.getServiceArchive() != null) {
-                /* TODO: Is this right?  Shouldn't the working directory be created
-                by the file manager under the 'work' dir?
+                /* This variable, and the method we're calling on VirtualFileSystemConfiguration,
+                is named in an unfortunate manner for 
+                historical reasons.  What we're really doing here is telling the 
+                VirtualFileSystemConfiguration where to read its configuration 
+                file from.  Iternally to VFSConfig, it's called the "root" directory.
+                It has nothing to do with the "working" directory where the service
+                should be allowed to write its own data.
                 */
                 workingDir = new File(env.getServiceArchive().getURL().toURI());
             } else {
                 workingDir = new File(env.getServiceArchive().getURL().toURI());
-
+            
             }
 
             grantPermissions(env.getClassLoader(),
@@ -311,7 +316,16 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
                             new Object[]{getConfig(), varName, contextVarName});
                 }
             }
+            
+            /* 
+            One extra "special" variable is the File that gives the working directory.
+            */
+            invokeStatic(env.getClassLoader(), configName, Strings.PUT_SPECIAL_ENTRY,
+                    new Class[]{String.class, Object.class},
+                    Strings.DOLLAR + Strings.WORKING_DIRECTORY, env.getWorkingDirectory());
             /* Install the Executor. */
+            log.log(Level.INFO, MessageNames.EXECUTOR_NAME_IS, 
+                    new Object[]{Strings.DOLLAR + Strings.EXECUTOR_NAME});
             invokeStatic(env.getClassLoader(), configName,
                     Strings.PUT_SPECIAL_ENTRY,
                     new Class[]{String.class, Object.class
@@ -341,9 +355,10 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
                 new Object[]{myName});
     }
 
-    public ServiceLifeCycle deployServiceArchive(FileObject serviceArchive) throws IOException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException {
+    public ServiceLifeCycle deployServiceArchive(String managerName, FileObject serviceArchive) throws IOException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException {
         // Create an application environment
         ApplicationEnvironment env = new ApplicationEnvironment();
+        env.setApplicationManagerName(managerName);
         env.setServiceArchive(serviceArchive);
         env.setServiceRoot(
                 serviceArchive.getFileSystem().getFileSystemManager().createFileSystem(Strings.JAR, serviceArchive));
@@ -396,6 +411,12 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
          */
         Permission[] perms = createPermissionsInClassloader(cl);
         grantPermissions(cl, perms);
+        
+        /*
+         Create the service's working directory and grant permissions to it.
+        */
+        createWorkDirectoryFor(env);
+        grantPermissionsToWorkDirectoryFor(env);
         
         /*
          * Create a working context (work manager).
@@ -579,5 +600,22 @@ public class StarterServiceDeployer implements StarterServiceDeployerMXBean {
         if (getAdmin != null) {
         }
 
+    }
+    
+    void createWorkDirectoryFor(ApplicationEnvironment env) throws IOException {
+        FileObject managerDir=fileUtility.getWorkingDirectory(env.getApplicationManagerName());
+        FileObject workingDir=managerDir.resolveFile(env.getServiceName());
+        if (!workingDir.exists()) {
+            workingDir.createFolder();
+        }
+        File workingDirFile=new File(workingDir.getName().getPath());
+        env.setWorkingDirectory(workingDirFile);
+    }
+    
+    void grantPermissionsToWorkDirectoryFor(ApplicationEnvironment env) {
+        Permission[] perms=new Permission[] {
+            new FilePermission(env.getWorkingDirectory().getAbsolutePath()+"/-","read,write,delete")
+        };
+        grantPermissions(env.getClassLoader(), perms);
     }
 }

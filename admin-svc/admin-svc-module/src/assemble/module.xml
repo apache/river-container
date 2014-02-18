@@ -47,6 +47,9 @@
             <!-- jsk jars are already provided by the container. -->
             <excludes>
                 <exclude>*:jsk-*</exclude>
+                <!-- This jar is in the parent, so we can't have it in the 
+                module -->
+                <exclude>org.apache.river.container:admin-svc-api</exclude>
             </excludes>
         </dependencySet>
         

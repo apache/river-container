@@ -45,7 +45,7 @@
     <!-- Deployer for 'service-starter'-style applications. 
     This is the 'admin-app' profile, so set the clientAppName to 'admin'
     -->
-    <cfg:component class="org.apache.river.container.deployer.ClientAppDeployer">
+    <cfg:component class="org.apache.river.container.deployer.CommandLineAppRunner">
         <cfg:property name="deployDirectory" value="deploy"/>
         <cfg:property name="clientAppName" value="admin"/>
     </cfg:component>

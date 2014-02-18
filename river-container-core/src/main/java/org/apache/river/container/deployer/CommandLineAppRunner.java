@@ -45,13 +45,15 @@ import org.apache.river.container.Utils;
 
 /**
  *
- * A Deployer task that deploys all the applications in a given directory when
- * the container is started up.
+ * A runner task that looks at the command line to determine the name of an
+ * application to run from a deployment folder.  Generally used to run "client"
+ * apps where the name of the app is supplied on the command line, for instance
+ * the browser app or the admin client app.
  */
-public class ClientAppDeployer {
+public class CommandLineAppRunner {
 
     private static final Logger log
-            = Logger.getLogger(ClientAppDeployer.class.getName(), MessageNames.BUNDLE_NAME);
+            = Logger.getLogger(CommandLineAppRunner.class.getName(), MessageNames.BUNDLE_NAME);
 
     @Injected
     ResourceBundle messages;
@@ -184,7 +186,7 @@ public class ClientAppDeployer {
             /*
              * Create the ApplicationEnvironment for the archive.
              */
-            ServiceLifeCycle deployedApp = deployer.deployServiceArchive(archiveFile);
+            ServiceLifeCycle deployedApp = deployer.deployServiceArchive(myName, archiveFile);
 
             deployedApp.startWithArgs(commandLineArgs);
         } catch (Throwable t) {

@@ -44,7 +44,7 @@
     </cfg:component>
     
     <!-- Deployer for 'service-starter'-style applications. -->
-    <cfg:component class="org.apache.river.container.deployer.ClientAppDeployer">
+    <cfg:component class="org.apache.river.container.deployer.CommandLineAppRunner">
         <cfg:property name="config" value="client-app.cfg"/>
         <cfg:property name="deployDirectory" value="deploy"/>
     </cfg:component>

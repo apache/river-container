@@ -18,6 +18,7 @@
 
 package org.apache.river.container.deployer;
 
+import java.io.File;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.river.container.classloading.VirtualFileSystemClassLoader;
 import org.apache.river.container.codebase.CodebaseContext;
@@ -30,6 +31,16 @@ import org.apache.river.container.work.WorkingContext;
 public class ApplicationEnvironment {
     VirtualFileSystemClassLoader classLoader=null;
 
+    String applicationManagerName=null;
+
+    public String getApplicationManagerName() {
+        return applicationManagerName;
+    }
+
+    public void setApplicationManagerName(String applicationManagerName) {
+        this.applicationManagerName = applicationManagerName;
+    }
+    
     String serviceName=null;
 
     public String getServiceName() {
@@ -94,5 +105,16 @@ public class ApplicationEnvironment {
     public void setWorkingContext(WorkingContext workingContext) {
         this.workingContext = workingContext;
     }
+    
+    File workingDirectory=null;
+
+    public File getWorkingDirectory() {
+        return workingDirectory;
+    }
+
+    public void setWorkingDirectory(File workingDirectory) {
+        this.workingDirectory = workingDirectory;
+    }
+    
     
 }

@@ -27,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
@@ -35,6 +34,7 @@ import javax.management.ObjectName;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileType;
+import org.apache.river.container.ApplicationManager;
 import org.apache.river.container.ConfigurationException;
 import org.apache.river.container.Context;
 import org.apache.river.container.FileUtility;
@@ -45,16 +45,18 @@ import org.apache.river.container.MBeanRegistrar;
 import org.apache.river.container.MessageNames;
 import org.apache.river.container.Name;
 import org.apache.river.container.Utils;
+import org.apache.river.container.admin.api.ApplicationInfo;
+import org.apache.river.container.admin.api.ApplicationStatus;
 
 /**
  *
- * A Deployer task that deploys all the applications in a given directory when
+ * A task that deploys and runs all the applications in a given directory when
  * the container is started up.
  */
-public class StartupDeployer {
+public class FolderBasedAppRunner implements ApplicationManager  {
 
     private static final Logger log
-            = Logger.getLogger(StartupDeployer.class.getName(), MessageNames.BUNDLE_NAME);
+            = Logger.getLogger(FolderBasedAppRunner.class.getName(), MessageNames.BUNDLE_NAME);
 
     private String deployDirectory = org.apache.river.container.Strings.DEFAULT_DEPLOY_DIRECTORY;
 
@@ -227,7 +229,7 @@ public class StartupDeployer {
         }
     }
 
-    private void synchDeployedServices(Map<String, DeploymentRecord> currentList,
+    private synchronized void synchDeployedServices(Map<String, DeploymentRecord> currentList,
             Map<String, DeploymentRecord> newList) {
         // For each entry
         for (DeploymentRecord rec : newList.values()) {
@@ -273,7 +275,7 @@ public class StartupDeployer {
             /*
              * Create the ApplicationEnvironment for the archive.
              */
-            dr.serviceLifeCycle = deployer.deployServiceArchive(dr.fileObject);
+            dr.serviceLifeCycle = deployer.deployServiceArchive(myName, dr.fileObject);
             // Register it as an MBean
             registerApplication(dr.serviceLifeCycle);
             dr.serviceLifeCycle.start();
@@ -287,5 +289,28 @@ public class StartupDeployer {
     private void stopAndRemove(DeploymentRecord dr) {
         dr.serviceLifeCycle.stop();
         unregisterApplication(dr.serviceLifeCycle);
+    }
+
+    public synchronized List<ApplicationInfo> getApplicationInfo() {
+        List<ApplicationInfo> info=new ArrayList<ApplicationInfo>(deployedServices.size());
+        for (DeploymentRecord rec: deployedServices.values()) {
+            ApplicationInfo item=new ApplicationInfo(myName, rec.name, toApplicationStatus(rec.serviceLifeCycle));
+            info.add(item);
+        }
+        return info;
+    }
+    
+    ApplicationStatus toApplicationStatus(ServiceLifeCycle lc) {
+        String status=lc.getStatus();
+        if (Strings.RUNNING.equals(status)) {
+            return ApplicationStatus.RUNNING;
+        }
+        if (Strings.IDLE.equals(status)) {
+            return ApplicationStatus.STOPPED;
+        }
+        if (Strings.FAILED.equals(status)) {
+            return ApplicationStatus.FAILED;
+        }
+        return ApplicationStatus.UNKNOWN;
     }
 }

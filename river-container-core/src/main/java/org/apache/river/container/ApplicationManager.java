@@ -16,40 +16,15 @@
  * limitations under the License.
  */
 
-package org.apache.river.container.admin.api;
+package org.apache.river.container;
 
-import java.io.Serializable;
+import java.util.List;
+import org.apache.river.container.admin.api.ApplicationInfo;
 
 /**
- * Transfer object for information about applications running in the container.
- * 
+ *
+ * @author trasukg
  */
-public class ApplicationInfo implements Serializable {
-    String name;
-    ApplicationStatus status;
-    String deployer;
-
-    public ApplicationInfo(String deployer, String name, ApplicationStatus status) {
-        this.deployer=deployer;
-        this.name = name;
-        this.status = status;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public ApplicationStatus getStatus() {
-        return status;
-    }
-
-    /**
-     * The name of the deployer that launched this service.
-     * @return 
-     */
-    public String getDeployer() {
-        return deployer;
-    }
-    
-    
+public interface ApplicationManager {
+    List<ApplicationInfo> getApplicationInfo();
 }

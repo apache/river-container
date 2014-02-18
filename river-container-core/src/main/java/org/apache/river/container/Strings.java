@@ -80,6 +80,7 @@ public class Strings {
             UNKNOWN="unknown",
             UNNAMED="unnamed",
             WHITESPACE_SEPARATORS=" \t\n\r",
-            WORK="work";
+            WORK="work",
+            WORKING_DIRECTORY="workingDirectory";
 
 }

@@ -25,7 +25,10 @@ package org.apache.river.container.deployer;
 public class Strings {
     public static final String
             EMPTY="",
+            FAILED="Failed",
+            IDLE="Idle",
             LPAREN="(",
             RPAREN=")",
+            RUNNING="Running",
             SPACE=" ";
 }

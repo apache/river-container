@@ -44,7 +44,7 @@
     
     <!-- Deployer for applications that are in the 'deploy' directory
     at startup. -->
-    <cfg:component class="org.apache.river.container.deployer.StartupDeployer">
+    <cfg:component class="org.apache.river.container.deployer.FolderBasedAppRunner">
         <cfg:property name="deployDirectory" value="deploy"/>
         <cfg:property name="autoDeploy" value="true"/>
     </cfg:component>

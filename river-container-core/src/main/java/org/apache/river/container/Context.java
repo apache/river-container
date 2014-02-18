@@ -19,6 +19,7 @@
 package org.apache.river.container;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +66,17 @@ public class Context {
         return contents.get(name);
     }
     
+    public <T extends Object> Collection<T> getAll(Class<T> type) {
+        List<T> list=new ArrayList<T>();
+        for (Object item:contents.values()) {
+            if (type.isAssignableFrom(item.getClass())) {
+                list.add((T) item);
+            }
+        }
+        return list;
+    }
+    
+
     /**
      Called by the bootstrapper to tell us that processing of the initialization
      file is now complete.
