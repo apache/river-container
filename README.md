@@ -38,10 +38,12 @@ line.
 <i>This step may not be required in the future, since you'll be able to 
 download a convenience binary once the project is released</i>
 
-Go to the root of the river-container download, and type  
+Go to the root of the river-container download, and type 
+ 
     mvn clean install
 
 ## Run the default container profile  
+
     cd product/target/product*
     bin/run 
 
