@@ -29,11 +29,11 @@ The First Fifteen Minutes
 Let's assume you've managed to download the source from git.  In fact, let's assume that
 you're reasonably conversant with git, so you can pull the examples project below.
 
-# Before You Start  
+## Before You Start  
 You'll need Maven 3.x installed, such that you can run 'mvn' from the command
 line.  
 
-# Build From Source 
+## Build From Source 
 
 <i>This step may not be required in the future, since you'll be able to 
 download a convenience binary once the project is released</i>
@@ -41,7 +41,7 @@ download a convenience binary once the project is released</i>
 Go to the root of the river-container download, and type  
     mvn clean install
 
-# Run the default container profile  
+## Run the default container profile  
     cd product/target/product*
     bin/run 
 
@@ -49,9 +49,10 @@ The steps above will startup a default container that has instances of the
 service registrar (Reggie) and the transaction manager (Mahalo).  All services
 are registered in a workgroup called 'RiverContainerDefault'.
 
-# Run the service browser  
+## Run the service browser  
 Open a new command line window in the root of the river-container download, then
-do the following  
+do the following:  
+
     cd product/target/product*
     bin/run client browser
 
@@ -60,20 +61,20 @@ Select the registrar.  You should now see the infrastructure services, Reggie an
 Mahalo.  Leave the service browser running while we start up a "Hello-world" 
 service, below.
 
-# Compile a "Hello-World" Service
+## Compile a "Hello-World" Service
 
 <i>Maybe the 'hello-world' example should be included in the container deliverable?
-Please comment on 'dev@river.apache.org'.</i>
-
-<i>Eventually, we should be able to create this example service using a Maven
+Please comment on 'dev@river.apache.org'.  Eventually, we should be able to 
+create this example service using a Maven
 archetype.</i>
 
 Using git, pull the examples from https://github.com/trasukg/river-container-examples.
 
-'cd' into your hello-example' directory, and then  
+'cd' into your hello-example' directory, and then:
+  
     mvn clean install
 
-# Deploy and run the "Hello-World" Service
+## Deploy and run the "Hello-World" Service
 
 When Maven is done, you should be able to see the finished service archive,
 'hello-module/target/hello-module-1.0-SNAPSHOT.jar'
@@ -90,7 +91,7 @@ service is being deployed.  If you didn't leave the container running, start it 
 You should also see the service in the service browser, with the interface
 'org.apache.river.container.hello.example.api.Greeter'
 
-# Deploy and Run the "Hello-World" Consumer
+## Deploy and Run the "Hello-World" Consumer
 
 When Maven finished above, it also created a client archive, 
 'hello-client-module/target/hello-client-module-1.0-SNAPSHOT.jar'
@@ -99,7 +100,8 @@ Copy that 'jar' file into the
 'profiles/client/deploy' folder inside our 'river-container/product/target/product*' folder.
 
 Open a new command line window in the root of the river-container download, then
-do the following  
+do the following:
+ 
     cd product/target/product*
     bin/run client hello-client
 
@@ -108,7 +110,7 @@ your name and then press return.
 
 The client sends the greeter service a message, then prints out the reply.
 
-# Use the Network!
+## Use the Network!
 
 If you have another machine on the local area network, and if the network is
 configured to allow multicast, you should be able to run the browser and the
